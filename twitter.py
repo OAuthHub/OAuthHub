@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 # SQL stuff
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from models import db, User, AccessToken, OAuthServer
 
 # OAuth stuff
@@ -13,6 +12,7 @@ from flask import Flask, redirect, session, g, url_for, request, flash
 
 # Other
 import logging
+from user_functions import getOrCreateUser
 
 # CONFIG
 DEBUG = True
@@ -47,39 +47,6 @@ def get_twitter_token(token=None):
 
 def createAccessToken(user, consumer, token, secret):
     pass
-
-def getUser(server, token, secret):
-    try:
-        user = User.query.join(AccessToken)\
-            .filter(AccessToken.server_id == server.id)\
-            .filter(AccessToken.token == token)\
-            .filter(AccessToken.secret == secret)\
-            .one()
-    except NoResultFound as nrf:
-        logging.exception("Didn't find user")
-        return None
-    except MultipleResultsFound as mrf:
-        logging.exception("Found too many users")
-        raise
-    
-    return user
-
-def addUser(server, token, secret):
-    user = User()
-    accessToken = AccessToken(server_id=server.id, token=token, secret=secret)
-    user.authorizations.append(accessToken)
-    db.session.add(user)
-    db.session.commit()
-    
-    return user
-
-def getOrCreateUser(consumer, token, secret):
-    user = getUser(consumer, token, secret)
-
-    if user is None:
-        user = addUser(consumer, token, secret)
-    
-    return user
 
 def getOAuthServer(resp):
     if db is None:
@@ -138,7 +105,7 @@ def oauth_authorized():
     # For now, we only have one server
     server = getOAuthServer(resp)
 
-    user = getOrCreateUser(server, resp['oauth_token'], resp['oauth_token_secret'])
+    user = getOrCreateUser(db, server, resp['oauth_token'], resp['oauth_token_secret'])
     session['user_id'] = user.id
 
     flash('You were signed in as %s' % resp['screen_name'])
