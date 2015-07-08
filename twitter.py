@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 # SQL stuff
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from models import db, User, AccessToken, OAuthServer
 
 # OAuth stuff
 import clients
@@ -26,40 +26,7 @@ print(twitter)
 app = Flask(__name__)
 app.config.from_object(__name__)
 
-db = SQLAlchemy(app)
-
-class User(db.Model):
-    __tablename__ = 'users'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    fullname = db.Column(db.String)
-    password = db.Column(db.String)
-    authorizations = db.relationship("AccessToken", backref=db.backref("user"))
-
-    def __repr__(self):
-        return "<User(name='{}', fullname='{}', password='{}')>".format(self.name, self.fullname, self.password)
-
-class AccessToken(db.Model):
-    __tablename__ = 'access_tokens'
-
-    id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String)
-    secret = db.Column(db.String)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
-
-    def __repr__(self):
-        return "<AccessToken(user='{}', server='{}', token='{}', secret='{}')>".format(self.user.name, self.server.name, self.token, self.secret)
-
-class OAuthServer(db.Model):
-    __tablename__ = 'servers'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-
-    def __repr__(self):
-        return "<OAuthServer(name='{}')>".format(self.name)
+db.init_app(app)
 
 class DatabaseNotFound(RuntimeError):
     pass
@@ -178,6 +145,5 @@ def oauth_authorized():
     return redirect(next_url)
 
 if __name__ == "__main__":
-    db.create_all()    
     app.run(host='0.0.0.0')
 
