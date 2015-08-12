@@ -2,6 +2,7 @@
 
 # SQL stuff
 from models import db, User, AccessToken, OAuthServer
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 # OAuth stuff
 import clients
@@ -21,7 +22,6 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 oauth = OAuth()
 twitter = clients.twitter(oauth)
-print(twitter)
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -30,20 +30,6 @@ db.init_app(app)
 
 class DatabaseNotFound(RuntimeError):
     pass
-
-@twitter.tokengetter
-def get_twitter_token(token=None):
-    user_id = session.get('user_id')
-
-    latestToken = AccessToken.query.join(User)\
-        .filter(User.id == user_id)\
-        .order_by(db.desc(AccessToken.id))\
-        .first()
-    
-    if latestToken is None:
-        return None
-
-    return (latestToken.token, latestToken.secret)
 
 def createAccessToken(user, consumer, token, secret):
     pass
@@ -73,7 +59,7 @@ def makeServer():
     db.session.add(server) 
     db.session.commit()
     
-    return 'Created Servers.'
+    return redirect(url_for('showUser'))
 
 @app.route('/user')
 def showUser():
@@ -81,7 +67,7 @@ def showUser():
         user = User.query.filter(User.id == session.get('user_id')).one()
     except NoResultFound as nrf:
         logging.exception("Didn't find user")
-        return 'You aren\'t logged in! <a href="/login">login</a>'
+        return 'You aren\'t logged in! <a href="/login?next=user">login</a>'
     except MultipleResultsFound as mrf:
         logging.exception("Found too many users")
         raise
