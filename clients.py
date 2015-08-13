@@ -2,21 +2,24 @@
 
 import os
 from flask import session
-from models import AccessToken, User, db
+from models import OAuthServer, AccessToken, User, db
 
-def twitter(oauth):
-    client = oauth.remote_app('twitter',
-        base_url='https://api.twitter.com/1.1/',
-        request_token_url='https://api.twitter.com/oauth/request_token',
-        access_token_url='https://api.twitter.com/oauth/access_token',
-        authorize_url='https://api.twitter.com/oauth/authenticate',
-        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
-        consumer_secret=os.environ['TWITTER_SECRET_KEY']
-    )
+class Twitter(OAuthServer):
+    def __init__(self, oauth):
+        super(Twitter, self).__init__(name='Twitter')
 
+        self.client = oauth.remote_app('twitter',
+            base_url='https://api.twitter.com/1.1/',
+            request_token_url='https://api.twitter.com/oauth/request_token',
+            access_token_url='https://api.twitter.com/oauth/access_token',
+            authorize_url='https://api.twitter.com/oauth/authenticate',
+            consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+            consumer_secret=os.environ['TWITTER_SECRET_KEY']
+        )
 
-    @client.tokengetter
-    def get_twitter_token(token=None):
+        self.client.tokengetter(self.getTwitterToken)
+
+    def getTwitterToken(self, token=None):
         user_id = session.get('user_id')
 
         latestToken = AccessToken.query.join(User)\
@@ -29,4 +32,14 @@ def twitter(oauth):
 
         return (latestToken.token, latestToken.secret)
 
-    return client
+    def getTwitterAccountStatus(self):
+        resp = self.client.get('account/verify_credentials.json')
+
+        if resp.status == 200:
+            data = resp.data
+        else:
+            data = None
+            flash('Unable to load data from Twitter. Maybe out of '
+                  'API calls or Twitter is overloaded.')
+
+        return data
