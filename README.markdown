@@ -22,14 +22,15 @@ variable. An example of the authorisation could be like this:
 
 # Python 3
 
-If you're using MySQL, notice that since the module `MySQLdb` (from the pip 
-package [`MySQL-python`](https://pypi.python.org/pypi/MySQL-python/1.2.5) 
-doesn't support Python 3, to use Flask-SQLAlchemy, you'll need to use a 
-different "driver" (a.k.a. "engine"?) as per 
-<http://flask-sqlalchemy.pocoo.org/2.0/config/#connection-uri-format>. The pip 
-package `PyMySQL` (`pip install pymysql`) seems to work, and is known to 
-Flask-SQLAlchemy as `pymysql` in the "driver" field of the URI string. More 
-details on `PyMySQL`: 
+If you're using MySQL, notice that the module `MySQLdb` (from the pip package
+[`MySQL-python`](https://pypi.python.org/pypi/MySQL-python/1.2.5)) doesn't
+support Python 3. To use Flask-SQLAlchemy, you'll need to use a different
+"driver" (a.k.a. "engine"?) as per
+<http://flask-sqlalchemy.pocoo.org/2.0/config/#connection-uri-format>.
+
+The pip package `PyMySQL` (`pip install pymysql`) seems to work, and is known
+to Flask-SQLAlchemy as `pymysql` in the "driver" field of the URI string. More
+details on `PyMySQL`:
 <http://stackoverflow.com/questions/22252397/importerror-no-module-named-mysqldb>.
 
 # Unit testing
