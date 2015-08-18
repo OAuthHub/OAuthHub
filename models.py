@@ -3,11 +3,7 @@ from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-
-# http://stackoverflow.com/questions/22252397/importerror-no-module-named-mysqldb
-# http://stackoverflow.com/questions/2952187/getting-error-loading-mysqldb-module-no-module-named-mysqldb-have-tried-pre
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-
 db = SQLAlchemy(app)
 
 class Consumer(db.Model):
@@ -34,6 +30,7 @@ class ConsumerUserAccess(db.Model):
     token = db.Column(db.String(1000))
     secret = db.Column(db.String(2000))
     consumer_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
+    #user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, token=None, secret=None):
         self.token = token
@@ -42,7 +39,7 @@ class ConsumerUserAccess(db.Model):
     def __repr__(self):
         return ("<ConsumerUserAccess(id='{}', token='{}', " +
                 "secret='{}', consumer='{}'), user='{}'>").format(
-                self.id, self.token, self.secret, self.consumer, '@@@')
+                self.id, self.token, self.secret, self.consumer,)
 
 def do():
     ''' Save some typing in the REPL.
