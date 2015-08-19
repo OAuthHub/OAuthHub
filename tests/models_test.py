@@ -2,7 +2,7 @@
 
 import os
 import unittest
-from models import db, Consumer, ConsumerUserAccess
+from models import db, Consumer, ConsumerUserAccess, User
 
 info = lambda *a, **k: None
 
@@ -20,7 +20,7 @@ class ModelsTest(unittest.TestCase):
         self.assertEqual([], Consumer.query.all())
         db.session.add(c)
         self.assertEqual([c], Consumer.query.all())  # Volatile!
-        db.session.commit() 
+        db.session.commit()
         self.assertEqual([c], Consumer.query.all())  # Persisted.
 
     def test_select(self):
@@ -44,15 +44,32 @@ class ModelsTest(unittest.TestCase):
         db.session.commit()
         self.assertEqual([], Consumer.query.all())  # Persisted.
 
+    def test_relationships(self):
+        cua = ConsumerUserAccess(token='CU-AT', secret='CU-ATS')
+        # C
+        c = Consumer.query.one()
+        cua.consumer = c
+        self.assertEqual([cua], c.accesses_to_users.all())
+        # U
+        u = User(name='John Doe')
+        cua.user = u
+        self.assertEqual([cua], u.accesses_from_consumers.all())
+        # Persist
+        db.session.add(cua)
+        db.session.commit()
+        self.assertEqual([cua], Consumer.query.one().accesses_to_users.all())
+        self.assertEqual([cua], User.query.one().accesses_from_consumers.all())
+
     def tearDown(self):
         info("Drop tables.")
 
         # Otherwise hangs at drop_all.
-        # More info: http://stackoverflow.com/questions/24289808/drop-all-freezes-in-flask-with-sqlalchemy
+        # More info: http://stackoverflow.com/questions/24289808/
         db.session.commit()
 
         db.drop_all()
         info("Tables dropped.")
+
 
 if __name__ == '__main__':
     uri = os.getenv('SQLALCHEMY_TESTING_DATABASE_URI')
@@ -63,7 +80,7 @@ if __name__ == '__main__':
     try:
         input('Press ^C to cancel, or <Enter> to continue')
     except KeyboardInterrupt:
-        os.exit()   
+        os.exit()
     app = db.get_app()
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
     unittest.main()
