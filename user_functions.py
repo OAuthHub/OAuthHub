@@ -10,10 +10,10 @@ def getUser(server, token, secret):
             .filter(UserSPAccess.token == token)\
             .filter(UserSPAccess.secret == secret)\
             .one()
-    except NoResultFound as nrf:
+    except NoResultFound:
         logging.exception("Didn't find user")
         return None
-    except MultipleResultsFound as mrf:
+    except MultipleResultsFound:
         logging.exception("Found too many users")
         raise
 
