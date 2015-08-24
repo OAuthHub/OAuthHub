@@ -1,6 +1,6 @@
 import logging
 
-from models import User
+from models import db, User, UserSPAccess
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 def getUser(server, token, secret):
@@ -22,7 +22,7 @@ def getUser(server, token, secret):
 def addUser(server, token, secret):
     user = User()
     access = UserSPAccess(sp_class_name=server.get_service_name(), token=token, secret=secret)
-    user.accesses_to_sps.append(accessToken)
+    user.accesses_to_sps.append(access)
     db.session.add(user)
     db.session.commit()
 
