@@ -1,17 +1,26 @@
 class ResourceNotAvailable(RuntimeError):
     pass
 
+class ServiceProviderDict(dict):
+    def add_provider(self, service_provider):
+        try:
+            key = service_provider._get_service_name()
+        except AttributeError as ae:
+            raise TypeError("You must implement _get_service_name().")
+
+        self[key] = service_provider
+
 class ServiceProvider():
-    def __init__(self):
-        self._client = _buildClient()
-        self._client.tokengetter(self._getToken)
+    def __init__(self, app):
+        self._client = _build_client(app)
+        self._client.tokengetter(self._get_token)
 
     def _get_token(self, token=None):
         user_id = session.get('user_id')
 
         latestToken = UserSPAccess.query\
             .filter(UserSPAccess.user_id == user_id)\
-            .filter(UserSPAccess.sp_class_name == self.__class__.__name__)\
+            .filter(UserSPAccess.sp_class_name == self._get_service_name())\
             .order_by(db.desc(UserSPAccess.id))\
             .first()
 
@@ -20,8 +29,11 @@ class ServiceProvider():
 
         return (latestToken.token, latestToken.secret)
 
-    def _build_client(self):
+    def _build_client(self, app):
         """ Should return an instance of a an oauth remote app. """
+        raise NotImplementedError()
+
+    def _get_service_name(self):
         raise NotImplementedError()
 
     def verify(self):
@@ -33,8 +45,8 @@ class ServiceProvider():
         raise NotImplementedError()
 
 class Twitter(ServiceProvider):
-    def _build_client(self):
-        return self.client = oauth.remote_app('twitter',
+    def _build_client(self, app):
+        return app.remote_app('twitter',
             base_url='https://api.twitter.com/1.1/',
             request_token_url='https://api.twitter.com/oauth/request_token',
             access_token_url='https://api.twitter.com/oauth/access_token',
@@ -42,6 +54,9 @@ class Twitter(ServiceProvider):
             consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
             consumer_secret=os.environ['TWITTER_SECRET_KEY']
         )
+
+    def _get_service_name(self):
+        return 'twitter'
 
     def verify(self):
         """ Check that this connection is valid. """
