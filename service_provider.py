@@ -6,7 +6,7 @@ class ServiceProvider():
         self._client = _buildClient()
         self._client.tokengetter(self._getToken)
 
-    def _getToken(self, token=None):
+    def _get_token(self, token=None):
         user_id = session.get('user_id')
 
         latestToken = UserSPAccess.query\
@@ -20,7 +20,7 @@ class ServiceProvider():
 
         return (latestToken.token, latestToken.secret)
 
-    def _buildClient(self):
+    def _build_client(self):
         """ Should return an instance of a an oauth remote app. """
         raise NotImplementedError()
 
@@ -33,7 +33,7 @@ class ServiceProvider():
         raise NotImplementedError()
 
 class Twitter(ServiceProvider):
-    def _buildClient(self):
+    def _build_client(self):
         return self.client = oauth.remote_app('twitter',
             base_url='https://api.twitter.com/1.1/',
             request_token_url='https://api.twitter.com/oauth/request_token',
