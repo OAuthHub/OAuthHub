@@ -1,4 +1,7 @@
 from os import environ
+from flask import session
+
+from models import db, UserSPAccess
 
 class ResourceNotAvailable(RuntimeError):
     pass
@@ -14,8 +17,8 @@ class ServiceProviderDict(dict):
 
 class ServiceProvider():
     def __init__(self, app):
-        self._client = self._build_client(app)
-        self._client.tokengetter(self._get_token)
+        self.client = self._build_client(app)
+        self.client.tokengetter(self._get_token)
 
     def _get_token(self, token=None):
         user_id = session.get('user_id')
@@ -36,7 +39,7 @@ class ServiceProvider():
         raise NotImplementedError()
 
     def get_service_name(self):
-        return self._client.name
+        return self.client.name
 
     def verify(self):
         """ Check that this connection is valid. """
@@ -59,7 +62,7 @@ class Twitter(ServiceProvider):
 
     def verify(self):
         """ Check that this connection is valid. """
-        resp = self._client.get('account/verify_credentials.json')
+        resp = self.client.get('account/verify_credentials.json')
 
         if resp.status == 200:
             return True
