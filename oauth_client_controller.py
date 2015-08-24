@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import logging
 from flask import Flask, redirect, session, url_for, request, flash
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
@@ -29,7 +28,6 @@ def show_user():
     except NoResultFound:
         return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>'
     except MultipleResultsFound:
-        logging.exception("Found too many users")
         raise
 
     twitter_name = providers['twitter'].name()
