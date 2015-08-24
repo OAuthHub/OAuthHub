@@ -1,13 +1,14 @@
 import logging
-from models import db, User, AccessToken, OAuthServer
+
+from models import User
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
-def getUser(db, server, token, secret):
+def getUser(server, token, secret):
     try:
-        user = User.query.join(AccessToken)\
-            .filter(AccessToken.server_id == server.id)\
-            .filter(AccessToken.token == token)\
-            .filter(AccessToken.secret == secret)\
+        user = User.query.join(UserSPAccess)\
+            .filter(UserSPAccess.sp_class_name == server.get_service_name())\
+            .filter(UserSPAccess.token == token)\
+            .filter(UserSPAccess.secret == secret)\
             .one()
     except NoResultFound as nrf:
         logging.exception("Didn't find user")
@@ -18,19 +19,19 @@ def getUser(db, server, token, secret):
 
     return user
 
-def addUser(db, server, token, secret):
+def addUser(server, token, secret):
     user = User()
-    accessToken = AccessToken(server_id=server.id, token=token, secret=secret)
-    user.authorizations.append(accessToken)
+    access = UserSPAccess(sp_class_name=server.get_service_name(), token=token, secret=secret)
+    user.accesses_to_sps.append(accessToken)
     db.session.add(user)
     db.session.commit()
 
     return user
 
-def getOrCreateUser(db, consumer, token, secret):
-    user = getUser(db, consumer, token, secret)
+def getOrCreateUser(server, token, secret):
+    user = getUser(server, token, secret)
 
     if user is None:
-        user = addUser(db, consumer, token, secret)
+        user = addUser(server, token, secret)
 
     return user
