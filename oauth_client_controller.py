@@ -30,8 +30,14 @@ def show_user():
     except MultipleResultsFound:
         raise
 
-    twitter_name = providers['twitter'].name()
-    return 'You are: ' + str(user.id) + '<br />Twitter Name: ' + str(twitter_name)
+    if len(user.accesses_to_sps) > 0:
+        service_name = user.accesses_to_sps[0].get_service_name()
+
+        if service_name in providers:
+            name = providers[service_name].name()
+            return 'You are: ' + str(user.id) + '<br />Name from ' + service_name + ': ' + str(name)
+
+    return "Uh, oh! Somebody messed up! You have no authorised service providers, so you shouldn't be here."
 
 @app.route('/login/<service_provider>/')
 def login(service_provider):
@@ -50,12 +56,15 @@ def login(service_provider):
 def oauth_authorized(service_provider):
     next_url = request.args.get('next') or url_for('show_user')
 
-    resp = providers['twitter'].client.authorized_response()
+    if service_provider not in providers:
+        return redirect(url_for(login))
+
+    resp = providers[service_provider].client.authorized_response()
     if resp is None:
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    user = getOrCreateUser(providers['twitter'], resp['oauth_token'], resp['oauth_token_secret'])
+    user = getOrCreateUser(providers[service_provider], resp['oauth_token'], resp['oauth_token_secret'])
     session['user_id'] = user.id
 
     flash('You were signed in as %s' % resp['screen_name'])
