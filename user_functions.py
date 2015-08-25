@@ -1,5 +1,7 @@
 import logging
 
+from flask import session, url_for
+from functools import wraps
 from models import db, User, UserSPAccess
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -35,3 +37,20 @@ def getOrCreateUser(server, token, secret):
         user = addUser(server, token, secret)
 
     return user
+
+def login_required(function):
+    @wraps(function)
+    def attempt_log_in(*args, **kwargs):
+        try:
+            user = User.query.filter(User.id == session.get('user_id')).one()
+        except NoResultFound:
+            #return redirect(url_for(not_logged_in))
+            return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>'
+        except MultipleResultsFound:
+            raise
+
+        kwargs['user'] = user
+
+        return function(*args, **kwargs)
+
+    return attempt_log_in

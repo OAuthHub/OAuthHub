@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 
+import logging
+
 from flask import Flask, redirect, session, url_for, request, flash
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 import service_provider as sp
 from models import db, User
-from user_functions import getOrCreateUser
+from user_functions import getOrCreateUser, login_required
 
 # CONFIG
 DEBUG = True
@@ -22,22 +24,17 @@ app.config.from_object(__name__)
 db.init_app(app)
 
 @app.route('/user')
-def show_user():
-    try:
-        user = User.query.filter(User.id == session.get('user_id')).one()
-    except NoResultFound:
-        return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>'
-    except MultipleResultsFound:
-        raise
-
-    if len(user.accesses_to_sps) > 0:
-        service_name = user.accesses_to_sps[0].get_service_name()
+@login_required
+def show_user(user = None):
+    if user is not None and user.accesses_to_sps.count():
+        service_name = user.accesses_to_sps.first().sp_class_name
 
         if service_name in providers:
             name = providers[service_name].name()
             return 'You are: ' + str(user.id) + '<br />Name from ' + service_name + ': ' + str(name)
 
-    return "Uh, oh! Somebody messed up! You have no authorised service providers, so you shouldn't be here."
+    logging.error("show_user was entered but there is no user object or no associated accounts.")
+    return "Uh, oh! Somebody messed up!"
 
 @app.route('/login/<service_provider>/')
 def login(service_provider):
