@@ -9,6 +9,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 import service_provider as sp
 from models import db, User
 from user_functions import getOrCreateUser, login_required
+from error_handling import show_error_page
 
 # CONFIG
 DEBUG = True
@@ -33,8 +34,7 @@ def show_user(user = None):
             name = providers[service_name].name()
             return 'You are: ' + str(user.id) + '<br />Name from ' + service_name + ': ' + str(name)
 
-    logging.error("show_user was entered but there is no user object or no associated accounts.")
-    return "Uh, oh! Somebody messed up!"
+    return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
 @app.route('/login/<service_provider>/')
 def login(service_provider):
