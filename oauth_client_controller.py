@@ -2,12 +2,12 @@
 
 import logging
 
-from flask import Flask, redirect, session, url_for, request, flash
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 import service_provider as sp
-from models import db, User
+from models import db, User, UserSPAccess
 from user_functions import getOrCreateUser, login_required
 from error_handling import show_error_page
 
@@ -32,7 +32,33 @@ def show_user(user = None):
 
         if service_name in providers:
             name = providers[service_name].name()
-            return 'You are: ' + str(user.id) + '<br />Name from ' + service_name + ': ' + str(name)
+            return render_template('user.html', name=name, providers=user.accesses_to_sps.all())
+
+    return show_error_page("Got into show_user with user set to None or no associations with service providers.")
+
+@app.route('/user/providers/remove/<provider_id>')
+@login_required
+def user_providers_remove(provider_id = None, user = None):
+    if provider_id is None:
+        return redirect(url_for('show_user'))
+
+    number_of_sps = user.accesses_to_sps.count()
+
+    if number_of_sps == 0:
+        flash("You have no accounts to remove.")
+        return redirect(url_for('show_user'))
+
+    if number_of_sps == 1:
+        flash("You cannot remove your last account.")
+        return redirect(url_for('show_user'))
+
+    if user is not None and user.accesses_to_sps.count():
+        provider = user.accesses_to_sps.filter(UserSPAccess.id == provider_id).one()
+
+        db.session.delete(provider)
+        db.session.commit()
+
+        return redirect(url_for('show_user'))
 
     return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
@@ -45,7 +71,6 @@ def login(service_provider):
                         'oauth_authorized',
                         service_provider = service_provider,
                         next=request.args.get('next') or request.referrer or url_for('show_user'))))
-
     else:
         return "Page Not found"
 

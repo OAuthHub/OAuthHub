@@ -1,0 +1,8 @@
+.provider {
+    clear:both;
+}
+
+.provider-name, .provider-remove {
+    float: left;
+    margin-left: 20px;
+}

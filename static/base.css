@@ -1,0 +1,9 @@
+.flash {
+    width: 800px;
+    margin: auto;
+
+    border: 1px solid red;
+    background-color: pink;
+
+    text-align: center;
+}
