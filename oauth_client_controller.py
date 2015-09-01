@@ -2,13 +2,13 @@
 
 import logging
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 import service_provider as sp
 from models import db, User, UserSPAccess
-from user_functions import getOrCreateUser, login_required
+from user_functions import add_SP_to_user, getOrCreateUser, login_required
 from error_handling import show_error_page
 
 # CONFIG
@@ -18,6 +18,7 @@ SECRET_KEY = 'developmentkey'
 oauth = OAuth()
 providers = sp.ServiceProviderDict()
 providers.add_provider(sp.Twitter(oauth))
+providers.add_provider(sp.GitHub(oauth))
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -70,9 +71,10 @@ def login(service_provider):
                 .authorize(callback=url_for(
                         'oauth_authorized',
                         service_provider = service_provider,
-                        next=request.args.get('next') or request.referrer or url_for('show_user'))))
+                        next=request.args.get('next') or request.referrer or url_for('show_user'),
+                        _external=True)))
     else:
-        return "Page Not found"
+        abort(404)
 
 @app.route('/oauth-authorized/<service_provider>/')
 def oauth_authorized(service_provider):
@@ -86,14 +88,30 @@ def oauth_authorized(service_provider):
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    user = getOrCreateUser(providers[service_provider], resp['oauth_token'], resp['oauth_token_secret'])
-    session['user_id'] = user.id
+    token = None
+    secret = None
 
-    flash('You were signed in as %s' % resp['screen_name'])
+    if 'oauth_token' in resp:
+        token = resp['oauth_token']
+        secret = resp['oauth_token_secret']
+
+    if 'access_token' in resp:
+        token = resp['access_token']
+
+    logging.info(resp)
+    if 'user_id' in session:
+        user = User.query.filter(User.id == session['user_id']).one()
+        add_SP_to_user(user, providers[service_provider],  token, secret)
+    else:
+        user = getOrCreateUser(providers[service_provider], token, secret)
+        session['user_id'] = user.id
+
+    flash('You were signed in.')
     return redirect(next_url)
 
 @app.route('/make-server')
 def makeServer():
+    session.clear()
     db.create_all()    
     
     return redirect(url_for('show_user'))
