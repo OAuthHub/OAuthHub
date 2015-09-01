@@ -9,6 +9,9 @@
     {% if get_flashed_messages()|length > 0 %}
         <div class='flash'>{{ get_flashed_messages() }}</div>
     {% endif %}
+    <div>
+        <a href='/login/github/'>Log in with GitHub</a>
+    </div>
     <div class='provider-container'>
         {% for sp in providers %}
             <div class='provider'>
