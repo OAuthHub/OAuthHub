@@ -23,10 +23,10 @@ def getUser(server, token, secret):
 
 def addUser(server, token, secret):
     user = User()
-    access = UserSPAccess(sp_class_name=server.get_service_name(), token=token, secret=secret)
-    user.accesses_to_sps.append(access)
     db.session.add(user)
     db.session.commit()
+
+    add_SP_to_user(user, server, token, secret)
 
     return user
 
@@ -54,3 +54,9 @@ def login_required(function):
         return function(*args, **kwargs)
 
     return attempt_log_in
+
+def add_SP_to_user(user, server, token, secret):
+    access = UserSPAccess(sp_class_name=server.get_service_name(), token=token, secret=secret)
+    user.accesses_to_sps.append(access)
+    db.session.add(user)
+    db.session.commit()
