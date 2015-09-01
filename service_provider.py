@@ -81,3 +81,29 @@ class Twitter(ServiceProvider):
             return resp.data['name']
         except KeyError as ke:
             raise ResourceNotAvailable("Server did not send the name")
+
+class GitHub(ServiceProvider):
+    def _build_client(self, app):
+        return app.remote_app('github',
+            consumer_key='6bcf6d2df5ff0f003735',
+            consumer_secret='ebb3d95e13d0a87cdd9614ede2f9b87a16e87fd9',
+            request_token_params={'scope': 'user'},
+            base_url='https://api.github.com/',
+            request_token_url=None,
+            access_token_method='POST',
+            access_token_url='https://github.com/login/oauth/access_token',
+            authorize_url='https://github.com/login/oauth/authorize'
+        )
+
+    def name(self):
+        """ This is an example of how a resource would be defined for an SP. """
+
+        resp = self.client.get('user')
+
+        if not resp.status == 200:
+            raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
+
+        try:
+            return resp.data['name']
+        except KeyError as ke:
+            raise ResourceNotAvailable("Server did not send the name")
