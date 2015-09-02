@@ -16,8 +16,8 @@ class ServiceProviderDict(dict):
         self[key] = service_provider
 
 class ServiceProvider():
-    def __init__(self, app):
-        self.client = self._build_client(app)
+    def __init__(self, oauth):
+        self.client = self._build_client(oauth)
         self.client.tokengetter(self._get_token)
 
     def _get_token(self, token=None):
@@ -34,7 +34,7 @@ class ServiceProvider():
 
         return (latestToken.token, latestToken.secret)
 
-    def _build_client(self, app):
+    def _build_client(self, oauth):
         """ Should return an instance of a an oauth remote app. """
         raise NotImplementedError()
 
@@ -50,8 +50,8 @@ class ServiceProvider():
         raise NotImplementedError()
 
 class Twitter(ServiceProvider):
-    def _build_client(self, app):
-        return app.remote_app('twitter',
+    def _build_client(self, oauth):
+        return oauth.remote_app('twitter',
             base_url='https://api.twitter.com/1.1/',
             request_token_url='https://api.twitter.com/oauth/request_token',
             access_token_url='https://api.twitter.com/oauth/access_token',
@@ -83,8 +83,8 @@ class Twitter(ServiceProvider):
             raise ResourceNotAvailable("Server did not send the name")
 
 class GitHub(ServiceProvider):
-    def _build_client(self, app):
-        return app.remote_app('github',
+    def _build_client(self, oauth):
+        return oauth.remote_app('github',
             consumer_key='6bcf6d2df5ff0f003735',
             consumer_secret='ebb3d95e13d0a87cdd9614ede2f9b87a16e87fd9',
             request_token_params={'scope': 'user'},
