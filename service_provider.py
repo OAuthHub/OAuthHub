@@ -64,10 +64,7 @@ class Twitter(ServiceProvider):
         """ Check that this connection is valid. """
         resp = self.client.get('account/verify_credentials.json')
 
-        if resp.status == 200:
-            return True
-
-        return False
+        return resp.status == 200
 
     def name(self):
         """ This is an example of how a resource would be defined for an SP. """
