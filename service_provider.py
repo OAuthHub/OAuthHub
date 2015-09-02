@@ -1,5 +1,7 @@
 from os import environ
 from flask import session
+import requests
+from requests.auth import HTTPBasicAuth
 
 from models import db, UserSPAccess
 
@@ -91,6 +93,15 @@ class GitHub(ServiceProvider):
             access_token_url='https://github.com/login/oauth/access_token',
             authorize_url='https://github.com/login/oauth/authorize'
         )
+
+    def verify(self):
+        url = '{base_url}applications/{client_id}/tokens/{access_token}'.format(
+            base_url=self.client._base_url,
+            client_id=self.client._consumer_key,
+            access_token=self.client._tokengetter()[0])
+        response = requests.get(url, auth=HTTPBasicAuth(self.client._consumer_key, self.client._consumer_secret))
+
+        return response.status_code == 200
 
     def name(self):
         """ This is an example of how a resource would be defined for an SP. """
