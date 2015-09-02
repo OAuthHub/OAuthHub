@@ -32,7 +32,7 @@ def show_user(user = None):
         authorised_services = user.accesses_to_sps.all()
 
         for service_record in authorised_services:
-            service_name = servic_record.sp_class_name
+            service_name = service_record.sp_class_name
 
             if service_name in providers:
                 service = providers[service_name]
