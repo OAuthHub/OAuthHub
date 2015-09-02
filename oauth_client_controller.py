@@ -29,11 +29,20 @@ db.init_app(app)
 @login_required
 def show_user(user = None):
     if user is not None and user.accesses_to_sps.count():
-        service_name = user.accesses_to_sps.first().sp_class_name
+        authorised_services = user.accesses_to_sps.all()
 
-        if service_name in providers:
-            name = providers[service_name].name()
-            return render_template('user.html', name=name, providers=user.accesses_to_sps.all())
+        for service_record in authorised_services:
+            service_name = servic_record.sp_class_name
+
+            if service_name in providers:
+                service = providers[service_name]
+
+                if not service.verify():
+                    # TODO potentially remove the service if it's not valid.
+                    continue
+
+                name = service.name()
+                return render_template('user.html', name=name, providers=authorised_services)
 
     return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
