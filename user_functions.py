@@ -51,3 +51,6 @@ def add_SP_to_user(user, server, token, secret):
     user.accesses_to_sps.append(access)
     db.session.add(user)
     db.session.commit()
+
+def get_user_by_id(user_id):
+    return User.query.filter(User.id == user_id).one()
