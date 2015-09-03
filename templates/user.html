@@ -7,7 +7,9 @@
 <body>
     <h1>Hello {{ name }}!</h1>
     {% if get_flashed_messages()|length > 0 %}
-        <div class='flash'>{{ get_flashed_messages() }}</div>
+        {% for mesg in get_flashed_messages() %}
+            <div class='flash'>{{ mesg }}</div>
+        {% endfor %}
     {% endif %}
     <div>
         <a href='/login/github/'>Log in with GitHub</a>
