@@ -6,17 +6,11 @@ from models import db, User, UserSPAccess
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 def getUser(server, token, secret):
-    try:
-        user = User.query.join(UserSPAccess)\
-            .filter(UserSPAccess.sp_class_name == server.get_service_name())\
-            .filter(UserSPAccess.token == token)\
-            .filter(UserSPAccess.secret == secret)\
-            .one()
-    except NoResultFound:
-        return None
-    except MultipleResultsFound:
-        logging.exception("Found too many users")
-        raise
+    user = User.query.join(UserSPAccess)\
+        .filter(UserSPAccess.sp_class_name == server.get_service_name())\
+        .filter(UserSPAccess.token == token)\
+        .filter(UserSPAccess.secret == secret)\
+        .one()
 
     return user
 
@@ -30,9 +24,9 @@ def addUser(server, token, secret):
     return user
 
 def getOrCreateUser(server, token, secret):
-    user = getUser(server, token, secret)
-
-    if user is None:
+    try:
+        user = getUser(server, token, secret)
+    except NoResultFound:
         user = addUser(server, token, secret)
 
     return user
@@ -45,8 +39,6 @@ def login_required(function):
         except NoResultFound:
             #return redirect(url_for(not_logged_in))
             return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>'
-        except MultipleResultsFound:
-            raise
 
         kwargs['user'] = user
 
