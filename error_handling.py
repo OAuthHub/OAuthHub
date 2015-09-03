@@ -1,6 +1,12 @@
 import logging
 from random import getrandbits
 
+class UserDeniedRequest(Exception):
+    pass
+
+class ServiceProviderNotFound(Exception):
+    pass
+
 def show_error_page(message):
     error_number = getrandbits(128)
     logging.error("{}: {}".format(error_number, message))

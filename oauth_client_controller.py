@@ -8,8 +8,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import service_provider as sp
 from models import db, User, UserSPAccess
-from user_functions import add_SP_to_user, addUser, getUser, get_user_by_id, login_required
-from error_handling import show_error_page
+from user_functions import add_SP_to_user, addUser, currently_logged_in, getUser, get_user_by_id, login_required
+from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
 # CONFIG
 DEBUG = True
@@ -85,6 +85,51 @@ def login(service_provider):
     else:
         abort(404)
 
+@app.route('/oauth-authorized/<service_provider>/')
+def oauth_authorized(service_provider_name):
+    try:
+        current_provider = get_service_provider(service_provider_name)
+        token, secret = get_access_tokens(current_provider)
+        user = getUser(current_provider, token, secret):
+
+        if currently_logged_in():
+            if user.id == current_user_id():
+                flash('This provider was already linked to this account.')
+            else:
+                flash('Merging accounts is not currently supported.')
+        else:
+            log_user_in(user)
+
+    except ServiceProviderNotFound:
+        flash('Provider not found.')
+
+    except UserDeniedRequest:
+        flash('You denied us access.')
+
+    except UserNotFound:
+        if currently_logged_in():
+            add_SP_to_user_by_id(session['user_id'], current_provider,  token, secret)
+        else:
+            addUser(current_provider, token, secret)
+            log_user_in(user)
+
+    finally:
+        next_url = request.args.get('next') or url_for('show_user')
+        return redirect(next_url)
+
+def get_service_provider(name):
+    if name not in providers:
+        raise ServiceProviderNotFound()
+
+    return providers[name]
+
+def get_access_tokens(provider):
+    resp = provider.client.authorized_response()
+    if resp is None:
+        raise UserDeniedRequest()
+
+    return extract_tokens(resp)
+
 def extract_tokens(resp):
     token = None
     secret = None
@@ -97,54 +142,11 @@ def extract_tokens(resp):
 
     return (token, secret)
 
-@app.route('/oauth-authorized/<service_provider>/')
-def oauth_authorized(service_provider):
-    next_url = request.args.get('next') or url_for('show_user')
-
-    if service_provider not in providers:
-        flash('Provider not found')
-        return redirect(url_for(login))
-
-    current_provider = providers[service_provider]
-
-    resp = current_provider.client.authorized_response()
-    if resp is None:
-        flash(u'You denied the request to sign in.')
-        return redirect(next_url)
-
-    token, secret = extract_tokens(resp)
-
-    currently_logged_in = 'user_id' in session
-
-    try:
-        user = getUser(current_provider, token, secret)
-        user_exists_on_oah = True
-    except NoResultFound:
-        user_exists_on_oah = False
-
-    if currently_logged_in:
-        if user_exists_on_oah:
-            if user.id == session['user_id']:
-                flash('This provider was already linked to this account.')
-            else:
-                flash('Merging accounts is not currently supported.')
-        else:
-            user = get_user_by_id(session['user_id'])
-            add_SP_to_user(user, current_provider,  token, secret)
-    else:
-        if not user_exists_on_oah:
-            user = addUser(current_provider, token, secret)
-            flash('A new account was created, just for you!')
-        session['user_id'] = user.id
-        flash('You were signed in.')
-
-    return redirect(next_url)
-
 @app.route('/make-server')
 def makeServer():
     session.clear()
-    db.create_all()    
-    
+    db.create_all()
+
     return redirect(url_for('show_user'))
 
 if __name__ == "__main__":
