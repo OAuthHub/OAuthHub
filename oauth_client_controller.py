@@ -4,11 +4,11 @@ import logging
 
 from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 
 import service_provider as sp
 from models import db, User, UserSPAccess
-from user_functions import add_SP_to_user, getOrCreateUser, login_required
+from user_functions import add_SP_to_user, addUser, getUser, get_user_by_id, login_required
 from error_handling import show_error_page
 
 # CONFIG
@@ -85,37 +85,59 @@ def login(service_provider):
     else:
         abort(404)
 
+def extract_tokens(resp):
+    token = None
+    secret = None
+
+    if 'oauth_token' in resp: # OAuth1
+        token = resp['oauth_token']
+        secret = resp['oauth_token_secret']
+    elif 'access_token' in resp: # OAuth2
+        token = resp['access_token']
+
+    return (token, secret)
+
 @app.route('/oauth-authorized/<service_provider>/')
 def oauth_authorized(service_provider):
     next_url = request.args.get('next') or url_for('show_user')
 
     if service_provider not in providers:
+        flash('Provider not found')
         return redirect(url_for(login))
 
-    resp = providers[service_provider].client.authorized_response()
+    current_provider = providers[service_provider]
+
+    resp = current_provider.client.authorized_response()
     if resp is None:
         flash(u'You denied the request to sign in.')
         return redirect(next_url)
 
-    token = None
-    secret = None
+    token, secret = extract_tokens(resp)
 
-    if 'oauth_token' in resp:
-        token = resp['oauth_token']
-        secret = resp['oauth_token_secret']
+    currently_logged_in = 'user_id' in session
 
-    if 'access_token' in resp:
-        token = resp['access_token']
+    try:
+        user = getUser(current_provider, token, secret)
+        user_exists_on_oah = True
+    except NoResultFound:
+        user_exists_on_oah = False
 
-    logging.info(resp)
-    if 'user_id' in session:
-        user = User.query.filter(User.id == session['user_id']).one()
-        add_SP_to_user(user, providers[service_provider],  token, secret)
+    if currently_logged_in:
+        if user_exists_on_oah:
+            if user.id == session['user_id']:
+                flash('This provider was already linked to this account.')
+            else:
+                flash('Merging accounts is not currently supported.')
+        else:
+            user = get_user_by_id(session['user_id'])
+            add_SP_to_user(user, current_provider,  token, secret)
     else:
-        user = getOrCreateUser(providers[service_provider], token, secret)
+        if not user_exists_on_oah:
+            user = addUser(current_provider, token, secret)
+            flash('A new account was created, just for you!')
         session['user_id'] = user.id
+        flash('You were signed in.')
 
-    flash('You were signed in.')
     return redirect(next_url)
 
 @app.route('/make-server')
