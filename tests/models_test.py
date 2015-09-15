@@ -2,18 +2,21 @@
 
 import os
 import unittest
-from models import db, Consumer, ConsumerUserAccess, User
+import logging
 
-info = lambda *a, **k: None
+from models import (db, Consumer, ConsumerUserAccess, User,
+        RequestToken, AccessToken, Nonce)
+
+log = logging.getLogger(__name__)
 
 class ModelsTest(unittest.TestCase):
 
     def setUp(self):
-        info("Create tables.")
+        log.debug("Create tables.")
         db.create_all()
         self.assertEqual([], Consumer.query.all())
         self.assertEqual([], ConsumerUserAccess.query.all())
-        info("Tables created.")
+        log.debug("Tables created.")
 
         # Test insert; also sets up for other tests.
         c = Consumer(key='my-key', secret='my-secret')
@@ -61,14 +64,14 @@ class ModelsTest(unittest.TestCase):
         self.assertEqual([cua], User.query.one().accesses_from_consumers.all())
 
     def tearDown(self):
-        info("Drop tables.")
+        log.debug("Drop tables.")
 
         # Otherwise hangs at drop_all.
         # More info: http://stackoverflow.com/questions/24289808/
         db.session.commit()
 
         db.drop_all()
-        info("Tables dropped.")
+        log.debug("Tables dropped.")
 
 
 if __name__ == '__main__':

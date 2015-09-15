@@ -60,3 +60,6 @@ target/
 
 # Text editor temp files
 **/.*.swp
+
+# IDE files
+.idea
