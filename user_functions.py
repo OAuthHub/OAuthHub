@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 class UserNotFound(Exception):
     pass
 
-def getUser(server, token, secret):
+def get_user(server, token, secret):
     try:
         user = User.query.join(UserSPAccess)\
             .filter(UserSPAccess.sp_class_name == server.get_service_name())\
@@ -24,19 +24,6 @@ def create_user():
     user = User()
     db.session.add(user)
     db.session.commit()
-    return user
-
-def create_user_with_access(server, token, secret):
-    user = create_user()
-    add_SP_to_user(user, server, token, secret)
-    return user
-
-def getOrCreateUser(server, token, secret):
-    try:
-        user = getUser(server, token, secret)
-    except UserNotFound:
-        user = create_user_with_access(server, token, secret)
-
     return user
 
 def login_required(function):
@@ -75,19 +62,6 @@ def current_user_id():
 
 def log_user_in(user):
     session['user_id'] = user.id
-
-def get_or_create_SP_access(service, token, secret):
-    try:
-        return get_SP_access(service, token, secret)
-    except NoResultFound:
-        return create_SP_access(service, token, secret)
-
-def get_SP_access(service, token, secret):
-    access = UserSPAccess.query\
-        .filter(UserSPAccess.sp_class_name == server.get_service_name())\
-        .filter(UserSPAccess.token == token)\
-        .filter(UserSPAccess.secret == secret)\
-        .one()
 
 def create_SP_access(service, token, secret):
     access = UserSPAccess(sp_class_name=service.get_service_name(), token=token, secret=secret)
