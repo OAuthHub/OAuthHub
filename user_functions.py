@@ -53,7 +53,7 @@ def login_required(function):
     return attempt_log_in
 
 def add_SP_to_user(user, server, token, secret):
-    access = UserSPAccess(sp_class_name=server.get_service_name(), token=token, secret=secret)
+    access = create_SP_access(server, token, secret)
     user.accesses_to_sps.append(access)
     db.session.add(user)
     db.session.commit()
@@ -73,3 +73,23 @@ def current_user_id():
 
 def log_user_in(user):
     session['user_id'] = user.id
+
+def get_or_create_SP_access(service, token, secret):
+    try:
+        return get_SP_access(service, token, secret)
+    except NoResultFound:
+        return create_SP_access(service, token, secret)
+
+def get_SP_access(service, token, secret):
+    access = UserSPAccess.query\
+        .filter(UserSPAccess.sp_class_name == server.get_service_name())\
+        .filter(UserSPAccess.token == token)\
+        .filter(UserSPAccess.secret == secret)\
+        .one()
+
+def create_SP_access(service, token, secret):
+    access = UserSPAccess(sp_class_name=service.get_service_name(), token=token, secret=secret)
+    access.remote_user_id = service.get_id(token=(token, secret))
+    db.session.add(access)
+    db.session.commit()
+    return access
