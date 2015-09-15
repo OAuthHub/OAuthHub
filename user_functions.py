@@ -20,20 +20,22 @@ def getUser(server, token, secret):
 
     return user
 
-def addUser(server, token, secret):
+def create_user():
     user = User()
     db.session.add(user)
     db.session.commit()
+    return user
 
+def create_user_with_access(server, token, secret):
+    user = create_user()
     add_SP_to_user(user, server, token, secret)
-
     return user
 
 def getOrCreateUser(server, token, secret):
     try:
         user = getUser(server, token, secret)
     except UserNotFound:
-        user = addUser(server, token, secret)
+        user = create_user_with_access(server, token, secret)
 
     return user
 
@@ -60,7 +62,7 @@ def add_SP_to_user(user, server, token, secret):
 
 def add_SP_to_user_by_id(user_id, server, token, secret):
     user = get_user_by_id(user_id)
-    add_SP_to_user(user, current_provider,  token, secret)
+    add_SP_to_user(user, server,  token, secret)
 
 def get_user_by_id(user_id):
     return User.query.filter(User.id == user_id).one()
@@ -93,3 +95,13 @@ def create_SP_access(service, token, secret):
     db.session.add(access)
     db.session.commit()
     return access
+
+def get_user_by_remote_id(provider, token=None):
+    try:
+        remote_id = provider.get_id(token=token)
+        access = User.query.join(UserSPAccess)\
+            .filter(UserSPAccess.sp_class_name == provider.get_service_name())\
+            .filter(UserSPAccess.remote_user_id == remote_id)\
+            .one()
+    except NoResultFound:
+        raise UserNotFound()
