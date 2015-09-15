@@ -37,11 +37,15 @@ def show_user(user = None):
             if service_name in providers:
                 service = providers[service_name]
 
-                if not service.verify():
-                    # TODO potentially remove the service if it's not valid.
-                    continue
+                # TODO potentially remove the service if it's not valid.
+                if not app.config.get('DEBUG'):
+                    if not service.verify():
+                        continue
 
-                name = service.name()
+                    name = service.name()
+                else:
+                    name = None
+
                 return render_template('user.html', name=name, providers=authorised_services)
 
     return show_error_page("Got into show_user with user set to None or no associations with service providers.")
