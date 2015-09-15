@@ -8,7 +8,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import service_provider as sp
 from models import db, User, UserSPAccess
-from user_functions import add_SP_to_user, addUser, currently_logged_in, getUser, get_user_by_id, log_user_in, login_required
+from user_functions import add_SP_to_user_by_id, create_user, currently_logged_in, getUser, log_user_in, login_required, UserNotFound, get_user_by_remote_id
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
 # CONFIG
@@ -107,15 +107,17 @@ def oauth_authorized(service_provider_name):
         flash('You denied us access.')
 
     except UserNotFound:
-        if currently_logged_in():
-            add_SP_to_user_by_id(session['user_id'], current_provider,  token, secret)
-        else:
-            addUser(current_provider, token, secret)
+        if not currently_logged_in():
+            try:
+                user = get_user_by_remote_id(current_provider, token=(token,secret))
+            except UserNotFound:
+                user = create_user()
             log_user_in(user)
 
-    finally:
-        next_url = request.args.get('next') or url_for('show_user')
-        return redirect(next_url)
+        add_SP_to_user_by_id(session['user_id'], current_provider, token, secret)
+
+    next_url = request.args.get('next') or url_for('show_user')
+    return redirect(next_url)
 
 def get_service_provider(name):
     if name not in providers:
