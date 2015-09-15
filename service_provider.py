@@ -86,10 +86,10 @@ class Twitter(ServiceProvider):
         return resp.status == 200
 
     def name(self, token=None):
-        return _get_credential_field('name', token)
+        return self._get_credential_field('name', token)
 
     def get_id(self, token=None):
-        return _get_credential_field('id', token)
+        return self._get_credential_field('id', token)
 
 class GitHub(ServiceProvider):
     def _build_client(self, oauth):
@@ -125,7 +125,7 @@ class GitHub(ServiceProvider):
         return response.status_code == 200
 
     def name(self, token=None):
-        return _get_credential_field('name', token)
+        return self._get_credential_field('name', token)
 
     def get_id(self, token=None):
-        return _get_credential_field('id', token)
+        return self._get_credential_field('id', token)
