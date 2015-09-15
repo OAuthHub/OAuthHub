@@ -23,6 +23,9 @@ class ServiceProvider():
         self.client.tokengetter(self._get_token)
 
     def _get_token(self, token=None):
+        if token is not None:
+            return token
+
         user_id = session.get('user_id')
 
         latestToken = UserSPAccess.query\
@@ -43,16 +46,15 @@ class ServiceProvider():
     def get_service_name(self):
         return self.client.name
 
-    def verify(self):
+    def verify(self, token=None):
         """ Check that this connection is valid. """
         raise NotImplementedError()
 
-    def name(self):
+    def name(self, token=None):
         """ This is an example of how a resource would be defined for an SP. """
         raise NotImplementedError()
 
-    def get_id(self):
-        """ This is an example of how a resource would be defined for an SP. """
+    def get_id(self, token=None):
         raise NotImplementedError()
 
 class Twitter(ServiceProvider):
@@ -66,8 +68,8 @@ class Twitter(ServiceProvider):
             consumer_secret=environ['TWITTER_SECRET_KEY']
         )
 
-    def _get_credential_field(self, field_name):
-        resp = self.client.get('account/verify_credentials.json')
+    def _get_credential_field(self, field_name, token=None):
+        resp = self.client.request('account/verify_credentials.json', token=token, method='GET')
 
         if not resp.status == 200:
             raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
@@ -77,17 +79,17 @@ class Twitter(ServiceProvider):
         except KeyError as ke:
             raise ResourceNotAvailable("Server did not send the {}".format(field_name))
 
-    def verify(self):
+    def verify(self, token=None):
         """ Check that this connection is valid. """
         resp = self.client.get('account/verify_credentials.json')
 
         return resp.status == 200
 
-    def name(self):
-        return _get_credential_field('name')
+    def name(self, token=None):
+        return _get_credential_field('name', token)
 
-    def get_id(self):
-        return _get_credential_field('id')
+    def get_id(self, token=None):
+        return _get_credential_field('id', token)
 
 class GitHub(ServiceProvider):
     def _build_client(self, oauth):
@@ -102,8 +104,8 @@ class GitHub(ServiceProvider):
             authorize_url='https://github.com/login/oauth/authorize'
         )
 
-    def _get_credential_field(self, field_name):
-        resp = self.client.get('user')
+    def _get_credential_field(self, field_name, token=None):
+        resp = self.client.get('user', token=token, method='GET')
 
         if not resp.status == 200:
             raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
@@ -113,17 +115,17 @@ class GitHub(ServiceProvider):
         except KeyError as ke:
             raise ResourceNotAvailable("Server did not send the {}".format(field_name))
 
-    def verify(self):
+    def verify(self, token=None):
         url = '{base_url}applications/{client_id}/tokens/{access_token}'.format(
             base_url=self.client._base_url,
             client_id=self.client._consumer_key,
-            access_token=self.client._tokengetter()[0])
+            access_token=self.client._tokengetter(token=token)[0])
         response = requests.get(url, auth=HTTPBasicAuth(self.client._consumer_key, self.client._consumer_secret))
 
         return response.status_code == 200
 
-    def name(self):
-        return _get_credential_field('name')
+    def name(self, token=None):
+        return _get_credential_field('name', token)
 
-    def get_id(self):
-        return _get_credential_field('id')
+    def get_id(self, token=None):
+        return _get_credential_field('id', token)
