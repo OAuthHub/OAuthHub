@@ -3,6 +3,7 @@
 import os
 import unittest
 import logging
+import subprocess
 
 from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
@@ -32,8 +33,15 @@ class ModelsTest(unittest.TestCase):
         log.debug("Tables created.")
 
         # Test insert; also sets up for other tests.
-        c = Consumer(key='my-key', secret='my-secret')
+        u = User(name="Mike O'Sullivan")
+        c = Consumer(
+            creator=u,
+            client_key='my-key',
+            client_secret='my-secret',
+            redirect_uris=['http://localhost:8000/callback'],
+            realms=['read'])
         self.assertEqual([], Consumer.query.all())
+        db.session.add(u)
         db.session.add(c)
         self.assertEqual([c], Consumer.query.all())  # Volatile!
         db.session.commit()
@@ -43,14 +51,14 @@ class ModelsTest(unittest.TestCase):
         consumers = Consumer.query.all()
         self.assertEqual(1, len(consumers))
         c = consumers[0]
-        self.assertEqual('my-key', c.key)
-        self.assertEqual('my-secret', c.secret)
+        self.assertEqual('my-key', c.client_key)
+        self.assertEqual('my-secret', c.client_secret)
 
     def test_update(self):
         c = Consumer.query.one()
-        c.key = 'new-key'
+        c.client_key = 'new-key'
         another_ref = Consumer.query.one()
-        self.assertEqual('new-key', another_ref.key)  # Volatile?
+        self.assertEqual('new-key', another_ref.client_key)  # Volatile?
         db.session.commit()  # Persisted.
 
     def test_delete(self):
@@ -67,7 +75,8 @@ class ModelsTest(unittest.TestCase):
         cua.consumer = c
         self.assertEqual([cua], c.accesses_to_users.all())
         # U
-        u = User(name='John Doe')
+        u = User.query.one()
+        self.assertTrue(u.name.startswith("Mike"))
         cua.user = u
         self.assertEqual([cua], u.accesses_from_consumers.all())
         # Persist
@@ -91,7 +100,7 @@ class FlaskOAuthlibModelsSpecTest(unittest.TestCase, FlaskOAuthlibSpecs):
     def setUp(self):
         self.user = User(name=USERNAME)
         self.consumer = Consumer(
-            user=self.user,
+            creator=self.user,
             client_key=CONSUMER_KEY, # 30 chars
             client_secret=CONSUMER_SECRET,
             redirect_uris=[REDIRECT_URI],
@@ -101,7 +110,8 @@ class FlaskOAuthlibModelsSpecTest(unittest.TestCase, FlaskOAuthlibSpecs):
             token=REQUEST_TOKEN,
             secret=REQUEST_TOKEN_SECRET,
             realms=[REALM],
-            redirect_uri=REDIRECT_URI)
+            redirect_uri=REDIRECT_URI,
+            user=self.user)
         self.nonce = Nonce(
             client_key=CONSUMER_KEY,
             timestamp=TIMESTAMP,

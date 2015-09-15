@@ -21,8 +21,11 @@ class FlaskOAuthlibSpecs:
         :param type_: type
         :return: None
         """
-        self.assertTrue(hasattr(obj, attr))
-        self.assertTrue(isinstance(getattr(obj, attr), type_))
+        self.assertTrue(hasattr(obj, attr), "obj: {!r}, attr: {}".format(
+            obj, attr))
+        self.assertTrue(isinstance(getattr(obj, attr), type_),
+                "<obj: {!r}, attr: {!r}, obj.attr: {!r}, expected_type: {}>"
+                    .format(obj, attr, getattr(obj, attr), type_))
 
     def _check_nonempty_container(self, box, box_type, elem_type):
         """ Check that box is a non-empty box-type of elem-type elements.
@@ -53,8 +56,8 @@ class FlaskOAuthlibSpecs:
             self._check_attr_of_type(rt, attr, str)
         self._check_attr_of_type(rt, 'user', user_type)
         self._check_attr_of_type(rt, 'client', client_type)
-        self.assertTrue(hasattr(rt, 'realms'))
-        self._check_nonempty_container(getattr(rt, 'realms'), list, str)
+        self._check_attr_of_type(rt, 'realms', list)
+        self._check_nonempty_container(rt.realms, list, str)
         self._check_attr_of_type(rt, 'client_key', str)  # Undocumented!
 
     def api_test_nonce(self, n):
@@ -65,7 +68,7 @@ class FlaskOAuthlibSpecs:
     def api_test_access_token(self, at, user_type, client_type):
         for attr in ['token', 'secret']:
             self._check_attr_of_type(at, attr, str)
-        self.assertTrue(hasattr(at, 'realms'))
+        self._check_attr_of_type(at, 'realms', list)
         self._check_nonempty_container(at.realms, list, str)
         self._check_attr_of_type(at, 'client', client_type)
         self._check_attr_of_type(at, 'user', user_type)

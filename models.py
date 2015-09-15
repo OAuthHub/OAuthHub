@@ -19,14 +19,37 @@ class Consumer(db.Model):
     client_secret = db.Column(db.String(600))
     accesses_to_users = db.relationship('ConsumerUserAccess',
             backref=db.backref('consumer'), lazy='dynamic')
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    creator = db.relationship('User',
+            backref=db.backref('api_apps', lazy='dynamic'))
+    _redirect_uris = db.Column(db.Text)
+    _realms = db.Column(db.Text)
 
-    def __init__(self, client_key=None, client_secret=None):
+    def __init__(self, creator, client_key, client_secret, redirect_uris, realms):
+        if (any(' ' in uri for uri in redirect_uris) or
+                any(' ' in r for r in realms)):
+            raise ValueError("redirect_uris and realms do not allow spaces.")
+        self.creator = creator
         self.client_key = client_key
         self.client_secret = client_secret
+        self._redirect_uris = ' '.join(redirect_uris)
+        self._realms = ' '.join(realms)
 
     def __repr__(self):
         return "<Consumer(id={!r}, client_key={!r}, client_secret={!r})>".format(
                 self.id, self.client_key, self.client_secret)
+
+    @property
+    def redirect_uris(self):
+        return self._redirect_uris.split(' ')
+
+    @property
+    def realms(self):
+        return self._realms.split(' ')
+
+    @property
+    def default_redirect_uri(self):
+        return self.redirect_uris[0]
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -167,7 +190,7 @@ class AccessToken(db.Model):
     client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
     client = db.relationship('Consumer')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('user')
+    user = db.relationship('User')
     realms = db.Column(db.Text)
     token = db.Column(db.String(1000))
     secret = db.Column(db.String(2000))
