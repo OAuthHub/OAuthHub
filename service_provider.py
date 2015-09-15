@@ -51,6 +51,10 @@ class ServiceProvider():
         """ This is an example of how a resource would be defined for an SP. """
         raise NotImplementedError()
 
+    def get_id(self):
+        """ This is an example of how a resource would be defined for an SP. """
+        raise NotImplementedError()
+
 class Twitter(ServiceProvider):
     def _build_client(self, oauth):
         return oauth.remote_app('twitter',
@@ -62,6 +66,17 @@ class Twitter(ServiceProvider):
             consumer_secret=environ['TWITTER_SECRET_KEY']
         )
 
+    def _get_credential_field(self, field_name):
+        resp = self.client.get('account/verify_credentials.json')
+
+        if not resp.status == 200:
+            raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
+
+        try:
+            return resp.data[field_name]
+        except KeyError as ke:
+            raise ResourceNotAvailable("Server did not send the {}".format(field_name))
+
     def verify(self):
         """ Check that this connection is valid. """
         resp = self.client.get('account/verify_credentials.json')
@@ -69,17 +84,10 @@ class Twitter(ServiceProvider):
         return resp.status == 200
 
     def name(self):
-        """ This is an example of how a resource would be defined for an SP. """
+        return _get_credential_field('name')
 
-        resp = self.client.get('account/verify_credentials.json')
-
-        if not resp.status == 200:
-            raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
-
-        try:
-            return resp.data['name']
-        except KeyError as ke:
-            raise ResourceNotAvailable("Server did not send the name")
+    def get_id(self):
+        return _get_credential_field('id')
 
 class GitHub(ServiceProvider):
     def _build_client(self, oauth):
@@ -94,6 +102,17 @@ class GitHub(ServiceProvider):
             authorize_url='https://github.com/login/oauth/authorize'
         )
 
+    def _get_credential_field(self, field_name):
+        resp = self.client.get('user')
+
+        if not resp.status == 200:
+            raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
+
+        try:
+            return resp.data[field_name]
+        except KeyError as ke:
+            raise ResourceNotAvailable("Server did not send the {}".format(field_name))
+
     def verify(self):
         url = '{base_url}applications/{client_id}/tokens/{access_token}'.format(
             base_url=self.client._base_url,
@@ -104,14 +123,7 @@ class GitHub(ServiceProvider):
         return response.status_code == 200
 
     def name(self):
-        """ This is an example of how a resource would be defined for an SP. """
+        return _get_credential_field('name')
 
-        resp = self.client.get('user')
-
-        if not resp.status == 200:
-            raise ResourceNotAvailable("Server responded with {}. Message: {}".format(resp.status, resp.raw_data))
-
-        try:
-            return resp.data['name']
-        except KeyError as ke:
-            raise ResourceNotAvailable("Server did not send the name")
+    def get_id(self):
+        return _get_credential_field('id')
