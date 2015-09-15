@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import logging
+import os
 
 from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
@@ -15,15 +16,16 @@ from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedR
 DEBUG = True
 SECRET_KEY = 'developmentkey'
 
+app = Flask(__name__)
+app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+
+db.init_app(app)
+
 oauth = OAuth()
 providers = sp.ServiceProviderDict()
 providers.add_provider(sp.Twitter(oauth))
 providers.add_provider(sp.GitHub(oauth))
-
-app = Flask(__name__)
-app.config.from_object(__name__)
-
-db.init_app(app)
 
 @app.route('/user')
 @login_required
