@@ -1,6 +1,11 @@
 import os
+import logging
+
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import gen_salt
+
+log = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
@@ -10,18 +15,18 @@ class Consumer(db.Model):
     __tablename__ = 'consumer'
 
     id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(300))
-    secret = db.Column(db.String(600))
+    client_key = db.Column(db.String(300))
+    client_secret = db.Column(db.String(600))
     accesses_to_users = db.relationship('ConsumerUserAccess',
             backref=db.backref('consumer'), lazy='dynamic')
 
-    def __init__(self, key=None, secret=None):
-        self.key = key
-        self.secret = secret
+    def __init__(self, client_key=None, client_secret=None):
+        self.client_key = client_key
+        self.client_secret = client_secret
 
     def __repr__(self):
-        return "<Consumer(id='{}', key='{}', secret='{}')>".format(
-                self.id, self.key, self.secret)
+        return "<Consumer(id={!r}, client_key={!r}, client_secret={!r})>".format(
+                self.id, self.client_key, self.client_secret)
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -85,10 +90,101 @@ class UserSPAccess(db.Model):
                         self.secret, self.sp_class_name, self.user_id)
 
 class RequestToken(db.Model):
-    pass
+    __tablename__ = 'request_token'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
+    client = db.relationship('Consumer')    # Does this work?
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User')          # Does this work?
+    redirect_uri = db.Column(db.String(2000))
+    realms = db.Column(db.Text)
+    token = db.Column(db.String(1000))
+    secret = db.Column(db.String(2000))
+    verifier = db.Column(db.String(2000))
+
+    def __init__(self, client, token, secret, redirect_uri, realms, user=None):
+        # I'm probably far too defensive here. -- Zong
+        if not all((
+                isinstance(client, Consumer),
+                isinstance(token, str),
+                isinstance(secret, str),
+                isinstance(redirect_uri, str),
+                (isinstance(realms, list) or isinstance(realms, tuple)),
+                realms,
+                isinstance(realms[0], str))):
+            log.debug("RequestToken.__init__ received: {}".format((
+                client, token, secret, redirect_uri, realms, user)))
+            raise ValueError("Check your arguments in the DEBUG log.")
+        self.client = client
+        self.user = user  # At first RT's have no associated user.
+        self.redirect_uri = redirect_uri
+        self.realms = list(realms)
+        self.token = token
+        self.secret = secret
+        self.verifier = gen_salt(40)
+
+    def __repr__(self):
+        return ("<RequestToken(client={}, user={}, "
+                "redirect_uri={!r}, realms={}, "
+                "token={!r}, secret={!r}, verifier={!r})>").format(
+                    self.client, self.user, self.redirect_uri, self.realms,
+                    self.token, self.secret, self.verifier)
+
+    @property
+    def client_key(self):
+        return self.client.client_key
 
 class Nonce(db.Model):
-    pass
+    __tablename__ = 'nonce'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_key = db.Column(db.String(300))
+    timestamp = db.Column(db.Integer)
+    nonce = db.Column(db.String(2000))
+    request_token = db.Column(db.String(1000))
+    access_token = db.Column(db.String(1000))
+
+    def __init__(self, client_key, timestamp, nonce,
+            request_token, access_token):
+        self.client_key = client_key
+        self.timestamp = timestamp
+        self.nonce = nonce
+        self.request_token = request_token
+        self.access_token = access_token
+
+    def __repr__(self):
+        return ("<Nonce(client_key={!r}, timestamp={!r}, nonce={!r}, "
+                "request_token={!r}, access_token={!r})>").format(
+                    self.client_key, self.timestamp, self.nonce,
+                    self.request_token, self.access_token)
+
 
 class AccessToken(db.Model):
-    pass
+    __tablename__ = 'access_token'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
+    client = db.relationship('Consumer')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('user')
+    realms = db.Column(db.Text)
+    token = db.Column(db.String(1000))
+    secret = db.Column(db.String(2000))
+
+    def __init__(self, client, user, realms, token, secret):
+        self.client = client
+        self.user = user
+        self.realms = list(realms)
+        self.token = token
+        self.secret = secret
+
+    def __repr__(self):
+        return ("<AccessToken(client={}, user={}, realms={}, "
+                "token={!r}, secret={!r})>").format(
+                    self.client, self.user, self.realms,
+                    self.token, self.secret)
+
+    @property
+    def client_key(self):
+        return self.client.client_key
