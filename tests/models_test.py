@@ -4,10 +4,23 @@ import os
 import unittest
 import logging
 
+from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
         RequestToken, AccessToken, Nonce)
 
 log = logging.getLogger(__name__)
+
+CONSUMER_KEY = '123456789012345678901234567890'
+CONSUMER_SECRET = '1234567890123456789012345678901234567890'
+REQUEST_TOKEN = '123456789012345678901234567890'
+REQUEST_TOKEN_SECRET = '1234567890123456789012345678901234567890'
+ACCESS_TOKEN = '123456789012345678901234567890'
+ACCESS_TOKEN_SECRET = '1234567890123456789012345678901234567890'
+TIMESTAMP = 1442305580
+NONCE = '1234567890123456789012345678901234567890'
+REALM = 'read'
+USERNAME = "Mike O'Sullivan"
+REDIRECT_URI = 'http://localhost:8000/callback'
 
 class ModelsTest(unittest.TestCase):
 
@@ -73,6 +86,40 @@ class ModelsTest(unittest.TestCase):
         db.drop_all()
         log.debug("Tables dropped.")
 
+class FlaskOAuthlibModelsSpecTest(unittest.TestCase, FlaskOAuthlibSpecs):
+
+    def setUp(self):
+        self.user = User(name=USERNAME)
+        self.consumer = Consumer(
+            user=self.user,
+            client_key=CONSUMER_KEY, # 30 chars
+            client_secret=CONSUMER_SECRET,
+            redirect_uris=[REDIRECT_URI],
+            realms=[REALM])
+        self.request_token = RequestToken(
+            client=self.consumer,
+            token=REQUEST_TOKEN,
+            secret=REQUEST_TOKEN_SECRET,
+            realms=[REALM],
+            redirect_uri=REDIRECT_URI)
+        self.nonce = Nonce(
+            client_key=CONSUMER_KEY,
+            timestamp=TIMESTAMP,
+            nonce=NONCE,
+            request_token=REQUEST_TOKEN,
+            access_token=ACCESS_TOKEN)
+        self.access_token = AccessToken(
+            client=self.consumer,
+            user=self.user,
+            realms=[REALM],
+            token=ACCESS_TOKEN,
+            secret=ACCESS_TOKEN_SECRET)
+
+    def test_types(self):
+        self.api_test_client(self.consumer)
+        self.api_test_request_token(self.request_token, User, Consumer)
+        self.api_test_access_token(self.access_token, User, Consumer)
+        self.api_test_nonce(self.nonce)
 
 if __name__ == '__main__':
     uri = os.getenv('SQLALCHEMY_TESTING_DATABASE_URI')

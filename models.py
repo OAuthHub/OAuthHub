@@ -83,3 +83,12 @@ class UserSPAccess(db.Model):
         return ('<UserSPAccess(token="{}", secret="{}", ' +
                     'sp_class_name="{}", user_id="{}">').format(self.token,
                         self.secret, self.sp_class_name, self.user_id)
+
+class RequestToken(db.Model):
+    pass
+
+class Nonce(db.Model):
+    pass
+
+class AccessToken(db.Model):
+    pass
