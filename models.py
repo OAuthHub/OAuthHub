@@ -68,6 +68,7 @@ class UserSPAccess(db.Model):
     secret = db.Column(db.String(2000))
     sp_class_name = db.Column(db.String(300))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    remote_user_id = db.Column(db.Integer)
 
     def __init__(self, token=None, secret=None, sp_class_name=None, user=None):
         """
