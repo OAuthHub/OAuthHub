@@ -126,6 +126,12 @@ def oauth_authorized(service_provider_name):
     next_url = request.args.get('next') or url_for('show_user')
     return redirect(next_url)
 
+@app.route('/login/')
+def not_logged_in():
+    next_url = request.args.get('next') or url_for('show_user')
+
+    return render_template('login.html')
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

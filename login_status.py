@@ -1,6 +1,6 @@
 
 from functools import wraps
-from flask import session, url_for, get_flashed_messages
+from flask import session, url_for, request, redirect
 from sqlalchemy.orm.exc import NoResultFound
 from models import User
 
@@ -10,8 +10,7 @@ def login_required(function):
         try:
             user = User.query.filter(User.id == session.get('user_id')).one()
         except NoResultFound:
-            #return redirect(url_for(not_logged_in))
-            return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>' + repr(get_flashed_messages())
+            return redirect('/login/?next=/user')
 
         kwargs['user'] = user
 
