@@ -4,7 +4,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from models import db, UserSPAccess
-from error_handling import ServiceProviderNotFound
+from error_handling import ServiceProviderNotFound, UserDeniedRequest
+
 
 class ResourceNotAvailable(RuntimeError):
     pass
@@ -23,6 +24,17 @@ class ServiceProviderDict(dict):
             return self[name]
         except KeyError:
             raise ServiceProviderNotFound("No SP of name: {}".format(name))
+
+def _extract_tokens(resp):
+    token = None
+    secret = None
+    if 'oauth_token' in resp: # OAuth1
+        token = resp['oauth_token']
+        secret = resp['oauth_token_secret']
+    elif 'access_token' in resp: # OAuth2
+        token = resp['access_token']
+    return (token, secret)
+
 
 class ServiceProvider():
     def __init__(self, oauth):
@@ -63,6 +75,17 @@ class ServiceProvider():
 
     def get_id(self, token=None):
         raise NotImplementedError()
+
+    def get_access_tokens(self):
+        """ Return a pair of strings, the second of which is None for OAuth 2.
+
+        :return: (access_token, access_token_secret)
+        """
+        resp = self.client.authorized_response()
+        if resp is None:
+            raise UserDeniedRequest()
+        else:
+            return _extract_tokens(resp)
 
 class Twitter(ServiceProvider):
     def _build_client(self, oauth):

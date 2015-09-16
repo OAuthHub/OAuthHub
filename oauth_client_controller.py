@@ -6,21 +6,20 @@ import os
 from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound
+from login_status import login_required, currently_logged_in, current_user_id, \
+    log_user_in
 
 import service_provider as sp
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
-        currently_logged_in, get_user, log_user_in, login_required,
-        UserNotFound, get_user_by_remote_id, current_user_id)
+                            get_user, UserNotFound, get_user_by_remote_id)
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
-# CONFIG
-DEBUG = True
-SECRET_KEY = 'developmentkey'
-
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config.update({
+    'DEBUG': True,
+    'SECRET_KEY': 'developmentkey',
+    'SQLALCHEMY_DATABASE_URI': os.getenv('SQLALCHEMY_DATABASE_URI')})
 
 db.init_app(app)
 
@@ -97,7 +96,7 @@ def login(service_provider):
 def oauth_authorized(service_provider_name):
     try:
         current_provider = providers.get_by_name(service_provider_name)
-        token, secret = get_access_tokens(current_provider)
+        token, secret = current_provider.get_access_tokens()
         user = get_user(current_provider, token, secret)
 
         if currently_logged_in():
@@ -127,31 +126,7 @@ def oauth_authorized(service_provider_name):
     next_url = request.args.get('next') or url_for('show_user')
     return redirect(next_url)
 
-def get_access_tokens(provider):
-    resp = provider.client.authorized_response()
-    if resp is None:
-        raise UserDeniedRequest()
-
-    return extract_tokens(resp)
-
-def extract_tokens(resp):
-    token = None
-    secret = None
-
-    if 'oauth_token' in resp: # OAuth1
-        token = resp['oauth_token']
-        secret = resp['oauth_token_secret']
-    elif 'access_token' in resp: # OAuth2
-        token = resp['access_token']
-
-    return (token, secret)
-
-@app.route('/make-server')
-def makeServer():
-    session.clear()
-    db.create_all()
-
-    return redirect(url_for('show_user'))
-
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(host='0.0.0.0')

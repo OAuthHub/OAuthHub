@@ -19,8 +19,6 @@ class Consumer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     client_key = db.Column(db.String(300))
     client_secret = db.Column(db.String(600))
-    accesses_to_users = db.relationship('ConsumerUserAccess',
-            backref=db.backref('consumer'), lazy='dynamic')
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     creator = db.relationship('User',
             backref=db.backref('api_apps', lazy='dynamic'))
@@ -58,10 +56,6 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(1000))
-    accesses_from_consumers = db.relationship('ConsumerUserAccess',
-            backref=db.backref('user'), lazy='dynamic')
-    accesses_to_sps = db.relationship('UserSPAccess',
-            backref=db.backref('user'), lazy='dynamic')
 
     def __init__(self, name=None):
         '''
@@ -119,6 +113,8 @@ class UserSPAccess(db.Model):
     secret = db.Column(db.String(2000))
     sp_class_name = db.Column(db.String(300))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User',
+            backref=db.backref('accesses_to_sps', lazy='dynamic'))
     remote_user_id = db.Column(db.Integer)
 
     def __init__(self, token=None, secret=None, sp_class_name=None, user=None):
