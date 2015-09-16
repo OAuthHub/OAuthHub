@@ -9,7 +9,7 @@ from flask import Flask
 
 from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
-        RequestToken, AccessToken, Nonce)
+        RequestToken, Nonce)
 
 log = logging.getLogger(__name__)
 
