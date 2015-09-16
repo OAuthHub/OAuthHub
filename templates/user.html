@@ -13,7 +13,7 @@
         {% endfor %}
     {% endif %}
     <div>
-        <a href='{{ url_for('login_options') }}'>Add another account</a>
+        <a href="{{ url_for('login_options') }}">Add another account</a>
     </div>
     <div class='provider-container'>
         {% for sp in providers %}
