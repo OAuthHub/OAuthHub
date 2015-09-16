@@ -6,12 +6,13 @@ import os
 from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
 from sqlalchemy.orm.exc import NoResultFound
+from login_status import login_required, currently_logged_in, current_user_id, \
+    log_user_in
 
 import service_provider as sp
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
-        currently_logged_in, get_user, log_user_in, login_required,
-        UserNotFound, get_user_by_remote_id, current_user_id)
+                            get_user, UserNotFound, get_user_by_remote_id)
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
 # CONFIG
