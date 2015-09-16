@@ -3,13 +3,21 @@
 import logging
 import os
 
-from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
+from flask import (abort, Flask, flash, redirect, render_template, request,
+        session, url_for, jsonify)
 from flask_oauthlib.client import OAuth
+from flask_oauthlib.provider.oauth1 import OAuth1Provider
 from sqlalchemy.orm.exc import NoResultFound
 from login_status import login_required, currently_logged_in, current_user_id, \
     log_user_in
 
 import service_provider as sp
+from controllers_for_sp_role import add_sp_role_controllers_to_app
+from hooks import (load_client,
+        load_access_token, save_access_token,
+        load_nonce, save_nonce,
+        load_request_token, save_request_token,
+        load_verifier, save_verifier)
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
                             get_user, UserNotFound, get_user_by_remote_id)
@@ -27,6 +35,17 @@ oauth = OAuth()
 providers = sp.ServiceProviderDict()
 providers.add_provider(sp.Twitter(oauth))
 providers.add_provider(sp.GitHub(oauth))
+
+oauthhub_as_sp = OAuth1Provider(app)
+oauthhub_as_sp.clientgetter(load_client)
+oauthhub_as_sp.tokengetter(load_access_token)
+oauthhub_as_sp.tokensetter(save_access_token)
+oauthhub_as_sp.grantgetter(load_request_token)
+oauthhub_as_sp.grantsetter(save_request_token)
+oauthhub_as_sp.noncegetter(load_nonce)
+oauthhub_as_sp.noncesetter(save_nonce)
+oauthhub_as_sp.verifiergetter(load_verifier)
+oauthhub_as_sp.verifiersetter(save_verifier)
 
 @app.route('/user')
 @login_required
@@ -92,6 +111,7 @@ def login(service_provider):
     else:
         abort(404)
 
+# TODO: change URL to "/oauth/authorized" --- or better yet, "/oauth/callback"
 @app.route('/oauth-authorized/<service_provider_name>/')
 def oauth_authorized(service_provider_name):
     try:
@@ -125,6 +145,8 @@ def oauth_authorized(service_provider_name):
 
     next_url = request.args.get('next') or url_for('show_user')
     return redirect(next_url)
+
+add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 
 if __name__ == "__main__":
     with app.app_context():
