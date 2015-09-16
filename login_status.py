@@ -10,7 +10,8 @@ def login_required(function):
         try:
             user = User.query.filter(User.id == session.get('user_id')).one()
         except NoResultFound:
-            return redirect('/login/?next=/user')
+            return redirect(url_for('login_options',
+                next=request.path))
 
         kwargs['user'] = user
 
