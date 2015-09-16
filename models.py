@@ -25,7 +25,6 @@ class Consumer(db.Model):
     _redirect_uris = db.Column(db.Text)
     _realms = db.Column(db.Text)
 
-
     def __init__(self, creator, client_key, client_secret, redirect_uris, realms):
         if (any(' ' in uri for uri in redirect_uris) or
                 any(' ' in r for r in realms)):
@@ -71,23 +70,43 @@ class ConsumerUserAccess(db.Model):
     __tablename__ = 'consumer_user_access'
 
     id = db.Column(db.Integer, primary_key=True)
-    token = db.Column(db.String(1000))
-    secret = db.Column(db.String(2000))
-    consumer_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
-    consumer = db.relationship('Consumer',
+    client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
+    client = db.relationship('Consumer',
             backref=db.backref('accesses_to_users', lazy='dynamic'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User',
             backref=db.backref('accesses_from_consumers', lazy='dynamic'))
 
-    def __init__(self, token=None, secret=None):
+    realms = db.Column(db.Text)
+    token = db.Column(db.String(1000))
+    secret = db.Column(db.String(2000))
+
+    def __init__(self, client, user, realms, token, secret):
+        """
+
+        :param client: Consumer
+        :param user: User
+        :param realms: list of str
+        :param token: str
+        :param secret: str
+        :return:
+        """
+        self.client = client
+        self.user = user
+        self.realms = list(realms)
         self.token = token
         self.secret = secret
 
     def __repr__(self):
-        return ("<ConsumerUserAccess(id='{}', token='{}', " +
-                "secret='{}', consumer='{}'), user='{}'>").format(
-                self.id, self.token, self.secret, self.consumer, self.user)
+        return ("<ConsumerUserAccess(client={}, user={}, realms={}, "
+                "token={!r}, secret={!r})>").format(
+            self.client, self.user, self.realms,
+            self.token, self.secret)
+
+    @property
+    def client_key(self):
+        return self.client.client_key
+
 
 class UserSPAccess(db.Model):
     __tablename__ = 'user_sp_access'
@@ -184,33 +203,3 @@ class Nonce(db.Model):
                 "request_token={!r}, access_token={!r})>").format(
                     self.client_key, self.timestamp, self.nonce,
                     self.request_token, self.access_token)
-
-
-class AccessToken(db.Model):
-    __tablename__ = 'access_token'
-
-    id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
-    client = db.relationship('Consumer')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User')
-    realms = db.Column(db.Text)
-    token = db.Column(db.String(1000))
-    secret = db.Column(db.String(2000))
-
-    def __init__(self, client, user, realms, token, secret):
-        self.client = client
-        self.user = user
-        self.realms = list(realms)
-        self.token = token
-        self.secret = secret
-
-    def __repr__(self):
-        return ("<AccessToken(client={}, user={}, realms={}, "
-                "token={!r}, secret={!r})>").format(
-                    self.client, self.user, self.realms,
-                    self.token, self.secret)
-
-    @property
-    def client_key(self):
-        return self.client.client_key

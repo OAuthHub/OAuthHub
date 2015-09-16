@@ -9,7 +9,7 @@ from flask import Flask
 
 from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
-        RequestToken, AccessToken, Nonce)
+        RequestToken, Nonce)
 
 log = logging.getLogger(__name__)
 
@@ -71,15 +71,16 @@ class ModelsTest(unittest.TestCase):
         self.assertEqual([], Consumer.query.all())  # Persisted.
 
     def test_relationships(self):
-        cua = ConsumerUserAccess(token='CU-AT', secret='CU-ATS')
-        # C
         c = Consumer.query.one()
-        cua.consumer = c
-        self.assertEqual([cua], c.accesses_to_users.all())
-        # U
         u = User.query.one()
         self.assertTrue(u.name.startswith("Mike"))
-        cua.user = u
+        cua = ConsumerUserAccess(
+            client=c,
+            user=u,
+            realms=['read'],
+            token='CU-AT',
+            secret='CU-ATS')
+        self.assertEqual([cua], c.accesses_to_users.all())
         self.assertEqual([cua], u.accesses_from_consumers.all())
         # Persist
         db.session.add(cua)
@@ -120,7 +121,7 @@ class FlaskOAuthlibModelsSpecTest(unittest.TestCase, FlaskOAuthlibSpecs):
             nonce=NONCE,
             request_token=REQUEST_TOKEN,
             access_token=ACCESS_TOKEN)
-        self.access_token = AccessToken(
+        self.access_token = ConsumerUserAccess(
             client=self.consumer,
             user=self.user,
             realms=[REALM],
