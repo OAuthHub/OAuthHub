@@ -51,6 +51,10 @@ class Consumer(db.Model):
     def default_redirect_uri(self):
         return self.redirect_uris[0]
 
+    @property
+    def default_realms(self):
+        return self.realms[0]
+
 class User(db.Model):
     __tablename__ = 'user'
 
