@@ -12,7 +12,7 @@ from login_status import login_required, currently_logged_in, current_user_id, \
 import service_provider as sp
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
-                            get_user, UserNotFound, get_user_by_remote_id)
+                            get_user_by_token, UserNotFound, get_user_by_remote_id)
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
 # CONFIG
@@ -99,7 +99,7 @@ def oauth_authorized(service_provider_name):
     try:
         current_provider = providers.get_by_name(service_provider_name)
         token, secret = current_provider.get_access_tokens()
-        user = get_user(current_provider, token, secret)
+        user = get_user_by_token(current_provider, token, secret)
 
         if currently_logged_in():
             if user.id == current_user_id():
