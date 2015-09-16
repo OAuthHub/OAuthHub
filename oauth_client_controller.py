@@ -15,13 +15,11 @@ from user_functions import (add_SP_to_user_by_id, create_user,
                             get_user, UserNotFound, get_user_by_remote_id)
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
-# CONFIG
-DEBUG = True
-SECRET_KEY = 'developmentkey'
-
 app = Flask(__name__)
-app.config.from_object(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+app.config.update({
+    'DEBUG': True,
+    'SECRET_KEY': 'developmentkey',
+    'SQLALCHEMY_DATABASE_URI': os.getenv('SQLALCHEMY_DATABASE_URI')})
 
 db.init_app(app)
 
@@ -128,11 +126,7 @@ def oauth_authorized(service_provider_name):
     next_url = request.args.get('next') or url_for('show_user')
     return redirect(next_url)
 
-@app.route('/make-server')
-def makeServer():
-    session.clear()
-    db.create_all()
-    return redirect(url_for('show_user'))
-
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(host='0.0.0.0')
