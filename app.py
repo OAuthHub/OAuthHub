@@ -12,11 +12,7 @@ from login_status import login_required, get_current_user, log_user_in
 
 import service_provider as sp
 from controllers_for_sp_role import add_sp_role_controllers_to_app
-from hooks import (load_client,
-        load_access_token, save_access_token,
-        load_nonce, save_nonce,
-        load_request_token, save_request_token,
-        load_verifier, save_verifier)
+from hooks import register_all_hooks
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
                             get_user_by_token, UserNotFound, get_user_by_remote_id)
@@ -36,15 +32,7 @@ providers.add_provider(sp.Twitter(oauth))
 providers.add_provider(sp.GitHub(oauth))
 
 oauthhub_as_sp = OAuth1Provider(app)
-oauthhub_as_sp.clientgetter(load_client)
-oauthhub_as_sp.tokengetter(load_access_token)
-oauthhub_as_sp.tokensetter(save_access_token)
-oauthhub_as_sp.grantgetter(load_request_token)
-oauthhub_as_sp.grantsetter(save_request_token)
-oauthhub_as_sp.noncegetter(load_nonce)
-oauthhub_as_sp.noncesetter(save_nonce)
-oauthhub_as_sp.verifiergetter(load_verifier)
-oauthhub_as_sp.verifiersetter(save_verifier)
+register_all_hooks(oauthhub_as_sp)
 
 @app.route('/user')
 @login_required

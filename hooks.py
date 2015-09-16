@@ -10,15 +10,15 @@ def current_user():
 
 log = logging.getLogger(__name__)
 
-def load_client(client_key):
+def _load_client(client_key):
     return Consumer.query.filter(
         Consumer.client_key == client_key).first()
 
-def load_request_token(token):
+def _load_request_token(token):
     return RequestToken.query.filter(
         RequestToken.token == token).first()
 
-def save_request_token(token, req):
+def _save_request_token(token, req):
     rt = token['oauth_token']
     rts = token['oauth_token_secret']
     c = req.client
@@ -34,12 +34,12 @@ def save_request_token(token, req):
     db.session.add(t)
     db.session.commit()
 
-def load_verifier(verifier, token):
+def _load_verifier(verifier, token):
     return RequestToken.query.filter(
         RequestToken.verifier == verifier and
         RequestToken.token == token).first()
 
-def save_verifier(token, verifier):     # And args, kwargs
+def _save_verifier(token, verifier):     # And args, kwargs
     t = RequestToken.query.filter(
         RequestToken.token == token).one()
     t.verifier = verifier
@@ -47,12 +47,12 @@ def save_verifier(token, verifier):     # And args, kwargs
     db.session.add(t)
     db.session.commit()
 
-def load_access_token(client_key, token):   # And args, kwargs
+def _load_access_token(client_key, token):   # And args, kwargs
     return ConsumerUserAccess.query.filter(
         ConsumerUserAccess.client_key == client_key and
         ConsumerUserAccess.token == token).first()
 
-def save_access_token(token, req):
+def _save_access_token(token, req):
     c = req.client
     u = req.user
     at = token['oauth_token']
@@ -75,7 +75,7 @@ def save_access_token(token, req):
     db.session.add(t)
     db.session.commit()
 
-def load_nonce(client_key, timestamp, nonce, request_token, access_token):
+def _load_nonce(client_key, timestamp, nonce, request_token, access_token):
     return Nonce.query.filter(
         Nonce.client_key == client_key and
         Nonce.timestamp == timestamp and
@@ -83,7 +83,7 @@ def load_nonce(client_key, timestamp, nonce, request_token, access_token):
         Nonce.request_token == request_token and
         Nonce.access_token == access_token).first()
 
-def save_nonce(client_key, timestamp, nonce, request_token, access_token):
+def _save_nonce(client_key, timestamp, nonce, request_token, access_token):
     n = Nonce(
         client_key=client_key,
         timestamp=timestamp,
@@ -92,3 +92,19 @@ def save_nonce(client_key, timestamp, nonce, request_token, access_token):
         access_token=access_token)
     db.session.add(n)
     db.session.commit()
+
+def register_all_hooks(provider):
+    """ Register all hooks onto given provider
+
+    :param provider: flask_oauthlib.provider.oauth1.OAuth1Provider
+    :return: None
+    """
+    provider.clientgetter(_load_client)
+    provider.tokengetter(_load_access_token)
+    provider.tokensetter(_save_access_token)
+    provider.grantgetter(_load_request_token)
+    provider.grantsetter(_save_request_token)
+    provider.noncegetter(_load_nonce)
+    provider.noncesetter(_save_nonce)
+    provider.verifiergetter(_load_verifier)
+    provider.verifiersetter(_save_verifier)
