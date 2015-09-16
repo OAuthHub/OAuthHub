@@ -44,6 +44,20 @@ class UserFunctionsTest(unittest.TestCase):
         self.assertEqual(1, User.query.count())
         self.assertEqual(0, UserSPAccess.query.count())
 
+    def test_get_user_when_none_exist(self):
+        try:
+            user = uf.get_user_by_token(sp, 'test', 'test')
+            self.fail()
+        except uf.UserNotFound:
+            pass
+
+    def test_get_user_by_id_when_none_exist(self):
+        try:
+            user = uf.get_user_by_remote_id(sp, token=('test', 'test'))
+            self.fail()
+        except uf.UserNotFound:
+            pass
+
     def test_get_user_by_tokens(self):
         user_created = uf.create_user()
         uf.add_SP_to_user(user_created, sp, 'test', 'test')
