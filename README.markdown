@@ -45,3 +45,7 @@ something equivalent to these commands:
 
     $ source .venv/bin/activate
     (.venv)$ PYTHONPATH=. python tests/whichever_you_want.py
+
+# Running the OAuthHub Consumer
+
+Run OAuthHub and visit http://foo.bar/make-server.

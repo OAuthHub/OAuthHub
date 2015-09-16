@@ -1,15 +1,17 @@
-import os
+from os import getenv
 import logging
 
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import gen_salt
 
-log = logging.getLogger(__name__)
+db = SQLAlchemy()
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-db = SQLAlchemy(app)
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = getenv('SQLALCHEMY_DATABASE_URI')
+    db.init_app(app)
+    return app
 
 class Consumer(db.Model):
     __tablename__ = 'consumer'

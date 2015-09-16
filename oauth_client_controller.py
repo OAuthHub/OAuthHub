@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import logging
+import os
 
 from flask import abort, Flask, flash, redirect, render_template, request, session, url_for
 from flask_oauthlib.client import OAuth
@@ -8,22 +9,23 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import service_provider as sp
 from models import db, User, UserSPAccess
-from user_functions import add_SP_to_user_by_id, create_user, currently_logged_in, getUser, log_user_in, login_required, UserNotFound, get_user_by_remote_id
+from user_functions import add_SP_to_user_by_id, create_user, currently_logged_in, get_user, log_user_in, login_required, UserNotFound, get_user_by_remote_id
 from error_handling import show_error_page, ServiceProviderNotFound, UserDeniedRequest
 
 # CONFIG
 DEBUG = True
 SECRET_KEY = 'developmentkey'
 
+app = Flask(__name__)
+app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
+
+db.init_app(app)
+
 oauth = OAuth()
 providers = sp.ServiceProviderDict()
 providers.add_provider(sp.Twitter(oauth))
 providers.add_provider(sp.GitHub(oauth))
-
-app = Flask(__name__)
-app.config.from_object(__name__)
-
-db.init_app(app)
 
 @app.route('/user')
 @login_required
@@ -37,11 +39,15 @@ def show_user(user = None):
             if service_name in providers:
                 service = providers[service_name]
 
-                if not service.verify():
-                    # TODO potentially remove the service if it's not valid.
-                    continue
+                # TODO potentially remove the service if it's not valid.
+                if not app.config.get('DEBUG'):
+                    if not service.verify():
+                        continue
 
-                name = service.name()
+                    name = service.name()
+                else:
+                    name = None
+
                 return render_template('user.html', name=name, providers=authorised_services)
 
     return show_error_page("Got into show_user with user set to None or no associations with service providers.")
@@ -90,7 +96,7 @@ def oauth_authorized(service_provider_name):
     try:
         current_provider = get_service_provider(service_provider_name)
         token, secret = get_access_tokens(current_provider)
-        user = getUser(current_provider, token, secret)
+        user = get_user(current_provider, token, secret)
 
         if currently_logged_in():
             if user.id == current_user_id():
