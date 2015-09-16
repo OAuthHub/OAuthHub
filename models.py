@@ -99,7 +99,7 @@ class UserSPAccess(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User',
             backref=db.backref('accesses_to_sps', lazy='dynamic'))
-    remote_user_id = db.Column(db.Integer)
+    remote_user_id = db.Column(db.String(1000))
 
     def __init__(self, token=None, secret=None, sp_class_name=None, user=None):
         """

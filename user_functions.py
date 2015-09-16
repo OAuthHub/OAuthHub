@@ -6,7 +6,7 @@ from models import db, User, UserSPAccess
 class UserNotFound(Exception):
     pass
 
-def get_user(server, token, secret):
+def get_user_by_token(server, token, secret):
     try:
         user = User.query.join(UserSPAccess)\
             .filter(UserSPAccess.sp_class_name == server.get_service_name())\
@@ -17,6 +17,16 @@ def get_user(server, token, secret):
         raise UserNotFound()
 
     return user
+
+def get_user_by_remote_id(provider, token=None):
+    try:
+        remote_id = provider.get_id(token=token)
+        access = User.query.join(UserSPAccess)\
+            .filter(UserSPAccess.sp_class_name == provider.get_service_name())\
+            .filter(UserSPAccess.remote_user_id == remote_id)\
+            .one()
+    except NoResultFound:
+        raise UserNotFound()
 
 def create_user():
     user = User()
@@ -43,13 +53,3 @@ def create_SP_access(service, token, secret):
     db.session.add(access)
     db.session.commit()
     return access
-
-def get_user_by_remote_id(provider, token=None):
-    try:
-        remote_id = provider.get_id(token=token)
-        access = User.query.join(UserSPAccess)\
-            .filter(UserSPAccess.sp_class_name == provider.get_service_name())\
-            .filter(UserSPAccess.remote_user_id == remote_id)\
-            .one()
-    except NoResultFound:
-        raise UserNotFound()
