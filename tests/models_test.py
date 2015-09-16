@@ -3,13 +3,12 @@
 import os
 import unittest
 import logging
-import subprocess
 
 from flask import Flask
 
 from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
-        RequestToken, Nonce)
+        RequestToken, Nonce, create_app)
 
 log = logging.getLogger(__name__)
 
@@ -25,11 +24,14 @@ REALM = 'read'
 USERNAME = "Mike O'Sullivan"
 REDIRECT_URI = 'http://localhost:8000/callback'
 
+app = create_app()
+
 class ModelsTest(unittest.TestCase):
 
     def setUp(self):
         log.debug("Create tables.")
-        db.create_all()
+        with app.app_context():
+            db.create_all()
         self.assertEqual([], Consumer.query.all())
         self.assertEqual([], ConsumerUserAccess.query.all())
         log.debug("Tables created.")
@@ -95,7 +97,8 @@ class ModelsTest(unittest.TestCase):
         # More info: http://stackoverflow.com/questions/24289808/
         db.session.commit()
 
-        db.drop_all()
+        with app.app_context():
+            db.drop_all()
         log.debug("Tables dropped.")
 
 class FlaskOAuthlibModelsSpecTest(unittest.TestCase, FlaskOAuthlibSpecs):
@@ -144,8 +147,6 @@ if __name__ == '__main__':
         input('Press ^C to cancel, or <Enter> to continue')
     except KeyboardInterrupt:
         os.exit()
-    app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
-    db.init_app(app)
     with app.app_context():
         unittest.main()

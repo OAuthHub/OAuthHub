@@ -77,7 +77,7 @@ class ConsumerUserAccess(db.Model):
     user = db.relationship('User',
             backref=db.backref('accesses_from_consumers', lazy='dynamic'))
 
-    realms = db.Column(db.Text)
+    _realms = db.Column(db.Text)
     token = db.Column(db.String(1000))
     secret = db.Column(db.String(2000))
 
@@ -93,7 +93,7 @@ class ConsumerUserAccess(db.Model):
         """
         self.client = client
         self.user = user
-        self.realms = list(realms)
+        self._realms = ' '.join(realms)
         self.token = token
         self.secret = secret
 
@@ -106,6 +106,10 @@ class ConsumerUserAccess(db.Model):
     @property
     def client_key(self):
         return self.client.client_key
+
+    @property
+    def realms(self):
+        return self._realms.split(' ')
 
 
 class UserSPAccess(db.Model):
