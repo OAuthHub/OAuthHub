@@ -4,18 +4,25 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from models import db, UserSPAccess
+from error_handling import ServiceProviderNotFound
 
 class ResourceNotAvailable(RuntimeError):
     pass
 
 class ServiceProviderDict(dict):
+
     def add_provider(self, service_provider):
         try:
             key = service_provider.get_service_name()
         except AttributeError as ae:
             raise TypeError("You must implement get_service_name().")
-
         self[key] = service_provider
+
+    def get_by_name(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise ServiceProviderNotFound("No SP of name: {}".format(name))
 
 class ServiceProvider():
     def __init__(self, oauth):
