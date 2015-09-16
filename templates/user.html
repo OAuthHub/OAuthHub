@@ -1,10 +1,6 @@
-<!doctype html>
-<head>
-    <title>Hello from Flask</title>
-    <link rel='stylesheet' type='text/css' href='/static/base.css'>
-    <link rel='stylesheet' type='text/css' href='/static/providers.css'>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     {% if name %}
         <h1>Hello {{ name }}!</h1>
     {% else %}
@@ -27,5 +23,4 @@
             </div>
         {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}
