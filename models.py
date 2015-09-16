@@ -71,9 +71,12 @@ class ConsumerUserAccess(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     client_id = db.Column(db.Integer, db.ForeignKey('consumer.id'))
-    client = db.relationship('Consumer')
+    client = db.relationship('Consumer',
+            backref=db.backref('accesses_to_users', lazy='dynamic'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User')
+    user = db.relationship('User',
+            backref=db.backref('accesses_from_consumers', lazy='dynamic'))
+
     realms = db.Column(db.Text)
     token = db.Column(db.String(1000))
     secret = db.Column(db.String(2000))
