@@ -1,29 +1,36 @@
 
 from functools import wraps
-from flask import session, url_for, get_flashed_messages
-from sqlalchemy.orm.exc import NoResultFound
+from flask import session, url_for, request, redirect
 from models import User
 
-def login_required(function):
-    @wraps(function)
+def login_required(controller):
+    @wraps(controller)
     def attempt_log_in(*args, **kwargs):
-        try:
-            user = User.query.filter(User.id == session.get('user_id')).one()
-        except NoResultFound:
-            #return redirect(url_for(not_logged_in))
-            return 'You aren\'t logged in! <a href="' + url_for('login', service_provider='twitter') + '">login</a>' + repr(get_flashed_messages())
-
-        kwargs['user'] = user
-
-        return function(*args, **kwargs)
-
+        if not get_current_user():
+            return redirect(url_for(
+                'login_options',
+                next=request.path))
+        else:
+            return controller(*args, **kwargs)
     return attempt_log_in
 
-def currently_logged_in():
-    return 'user_id' in session
+def get_current_user():
+    """ Get the currently logged-in user (else None)
 
-def current_user_id():
-    return session['user_id']
+    :return: User or None
+    """
+    return (User.query
+            .filter(User.id == session.get('user_id'))
+            .first())
 
 def log_user_in(user):
+    """ Mark a user as currently logged-in, for the session
+
+    :param user: User
+    :return: None
+    """
     session['user_id'] = user.id
+
+def log_user_out():
+    if 'user_id' in session:
+        del session['user_id']
