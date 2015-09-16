@@ -72,7 +72,7 @@ class Twitter(ServiceProvider):
             access_token_url='https://api.twitter.com/oauth/access_token',
             authorize_url='https://api.twitter.com/oauth/authenticate',
             consumer_key=environ['TWITTER_CONSUMER_KEY'],
-            consumer_secret=environ['TWITTER_SECRET_KEY']
+            consumer_secret=environ['TWITTER_CONSUMER_SECRET']
         )
 
     def _get_credential_field(self, field_name, token=None):
