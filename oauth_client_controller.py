@@ -98,7 +98,7 @@ def login(service_provider):
 def oauth_authorized(service_provider_name):
     try:
         current_provider = providers.get_by_name(service_provider_name)
-        token, secret = get_access_tokens(current_provider)
+        token, secret = current_provider.get_access_tokens()
         user = get_user(current_provider, token, secret)
 
         if currently_logged_in():
@@ -128,30 +128,10 @@ def oauth_authorized(service_provider_name):
     next_url = request.args.get('next') or url_for('show_user')
     return redirect(next_url)
 
-def get_access_tokens(provider):
-    resp = provider.client.authorized_response()
-    if resp is None:
-        raise UserDeniedRequest()
-
-    return extract_tokens(resp)
-
-def extract_tokens(resp):
-    token = None
-    secret = None
-
-    if 'oauth_token' in resp: # OAuth1
-        token = resp['oauth_token']
-        secret = resp['oauth_token_secret']
-    elif 'access_token' in resp: # OAuth2
-        token = resp['access_token']
-
-    return (token, secret)
-
 @app.route('/make-server')
 def makeServer():
     session.clear()
     db.create_all()
-
     return redirect(url_for('show_user'))
 
 if __name__ == "__main__":
