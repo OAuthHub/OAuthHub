@@ -127,10 +127,10 @@ def oauth_authorized(service_provider_name):
     return redirect(next_url)
 
 @app.route('/login/')
-def not_logged_in():
+def login_options():
     next_url = request.args.get('next') or url_for('show_user')
 
-    return render_template('login.html')
+    return render_template('login.html', next_url=next_url)
 
 if __name__ == "__main__":
     with app.app_context():
