@@ -5,6 +5,8 @@ import unittest
 import logging
 import subprocess
 
+from flask import Flask
+
 from tests.flask_oauthlib_api_spec import FlaskOAuthlibSpecs
 from models import (db, Consumer, ConsumerUserAccess, User,
         RequestToken, AccessToken, Nonce)
@@ -141,6 +143,8 @@ if __name__ == '__main__':
         input('Press ^C to cancel, or <Enter> to continue')
     except KeyboardInterrupt:
         os.exit()
-    app = db.get_app()
+    app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
-    unittest.main()
+    db.init_app(app)
+    with app.app_context():
+        unittest.main()
