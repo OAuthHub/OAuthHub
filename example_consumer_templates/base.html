@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Hello from Flask</title>
+    <title>{% block title_tag %}Hello from Flask{% endblock %}</title>
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab|Roboto:400,400italic' rel='stylesheet' type='text/css'>
     <link rel='stylesheet' type='text/css' href='/static/normalize.css'>
     <link rel='stylesheet' type='text/css' href='/static/example-base.css'>
@@ -12,11 +12,13 @@
             <h1 class='page-title'>Consumer</h1>
         </div>
 
-        {% if get_flashed_messages()|length > 0 %}
-            {% for mesg in get_flashed_messages() %}
-                <div class='flash'>{{ mesg }}</div>
-            {% endfor %}
-        {% endif %}
+        {% with msgs = get_flashed_messages() %}
+            {% if msgs %}
+                {% for category, message in msgs %}
+                    <div class='{{ category }}'>{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <div id='content'>
             <h2 class='sub-title'>{% block title %} {% endblock %}</h2>

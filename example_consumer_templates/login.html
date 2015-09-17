@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title_tag %}
+        {% if user %}
+            Hello, {{ user.name }}!
+        {% else %}
+            Hello, user!
+        {% endif %}
+{% endblock %}
+
+{% block title %}
+Welcome to Example Consumer!
+{% endblock %}
+
+{% block content %}
+<div>
+    <a
+        class="button"
+        href="{{ url_for('login') }}">Log in through OAuthHub</a>
+</div>
+{% endblock %}

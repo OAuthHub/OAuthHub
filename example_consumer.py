@@ -102,12 +102,16 @@ def create_app():
     oauthhub.tokengetter(get_access_token)
 
     @app.route('/')
-    @login_required
     def index():
         current_user = get_current_user()
-        return render_template(
-            'index.html',
-            user=current_user)
+        if current_user is None:
+            return render_template(
+                'login.html',
+                user=current_user)
+        else:
+            return render_template(
+                'user.html',
+                user=current_user)
 
     @app.route('/login/')
     def login():
