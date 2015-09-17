@@ -10,8 +10,10 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from controllers_for_sp_role import add_sp_role_controllers_to_app
 from controllers_for_client_role import add_client_role_controllers_to_app
+from controllers_for_ui import add_ui_controllers_to_app
 from hooks import register_all_hooks
 from models import db
+import service_provider as sp
 
 app = Flask(__name__)
 app.config.update({
@@ -27,7 +29,13 @@ register_all_hooks(oauthhub_as_sp)
 add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 
 oauth = OAuth()
-add_client_role_controllers_to_app(app, oauth)
+providers = sp.ServiceProviderDict()
+providers.add_provider(sp.Twitter(oauth))
+providers.add_provider(sp.GitHub(oauth))
+
+add_client_role_controllers_to_app(app, providers)
+
+add_ui_controllers_to_app(app, providers)
 
 if __name__ == "__main__":
     with app.app_context():
