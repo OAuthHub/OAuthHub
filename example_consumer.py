@@ -84,11 +84,11 @@ def create_app():
         consumer_secret=CONSUMER_SECRET,
         request_token_params={
             'realm': 'read'},
-        base_url='http://127.0.0.1:5000/api/v1/',
-        request_token_url='http://127.0.0.1:5000/oauth/request-token',
+        base_url='http://gazza.servehttp.com/api/v1/',
+        request_token_url='http://gazza.servehttp.com/oauth/request-token',
         access_token_method='GET',
-        access_token_url='http://127.0.0.1:5000/oauth/access-token',
-        authorize_url='http://127.0.0.1:5000/oauth/authorize')
+        access_token_url='http://gazza.servehttp.com/oauth/access-token',
+        authorize_url='http://gazza.servehttp.com/oauth/authorize')
     oauthhub.tokengetter(get_access_token)
 
     @app.route('/')

@@ -1,9 +1,12 @@
 
 import logging
 
+from oauthlib.common import Request
+
 from login_status import get_current_user
 from models import (db, Consumer, ConsumerUserAccess, User, UserSPAccess,
         RequestToken, Nonce)
+from utils import log_io
 
 log = logging.getLogger(__name__)
 
@@ -36,11 +39,24 @@ def _load_verifier(verifier, token):
         RequestToken.verifier == verifier and
         RequestToken.token == token).first()
 
-def _save_verifier(token, verifier):     # And args, kwargs
-    t = RequestToken.query.filter(
-        RequestToken.token == token).one()
-    t.verifier = verifier
-    t.user = get_current_user()
+@log_io(log.debug)
+def _save_verifier(token, verifier, request):     # And args, kwargs
+    assert all((
+        isinstance(token, str),
+        isinstance(verifier, dict),
+        isinstance(verifier['oauth_verifier'], str),
+        isinstance(verifier['oauth_token'], str),
+        isinstance(verifier['resource_owner_key'], str),
+        verifier['oauth_token'] == verifier['resource_owner_key'],
+        isinstance(request, Request)
+    )), repr((token, verifier, request))
+    rt = verifier['oauth_token']
+    veri = verifier['oauth_verifier']
+    session_user = get_current_user()
+    assert session_user is not None
+    t = RequestToken.query.filter_by(token=rt).one()
+    t.verifier = veri
+    t.user = session_user
     db.session.add(t)
     db.session.commit()
 

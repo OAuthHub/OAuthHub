@@ -4,8 +4,8 @@ import logging
 from flask import request, redirect, url_for, render_template, flash
 from werkzeug.security import gen_salt
 
-from login_status import login_required
-from models import db, Consumer, ConsumerUserAccess
+from login_status import login_required, login_not_really_required
+from models import db, Consumer, ConsumerUserAccess, RequestToken
 from login_status import get_current_user
 
 log = logging.getLogger(__name__)
@@ -114,10 +114,31 @@ def _add_for_oauth(app, oauthhub_as_sp):
         return {}
 
     @app.route('/oauth/authorize', methods=['GET', 'POST'])
-    @login_required
+    @login_not_really_required
     @oauthhub_as_sp.authorize_handler
-    def oauth_authorise():
+    def oauth_authorise(*args, **kwargs):
         if request.method == 'GET':
-            return render_template('authorize.html', service_name='XXX', permissions=['a', 'b'])
+            log.debug("oauth_authorise was called.")
+            log.debug("args: {!r}".format(args))
+            log.debug("kwargs: {!r}".format(kwargs))
+            # Don't know why, but args always passed in as kwargs.
+            raw_realms = kwargs['realms']
+            realms = raw_realms.split(' ')
+            request_token = kwargs['resource_owner_key']
+            # Anyway.
+            assert isinstance(realms, list), repr(realms)
+            assert realms, realms
+            assert isinstance(realms[0], str), repr(realms[0])
+            assert isinstance(request_token, str), repr(request_token)
+            log.debug("The above args/kwargs are interpretted as:")
+            log.debug("Realms: {!r}".format(realms))
+            log.debug("Request token: {!r}".format(request_token))
+            request_token = (RequestToken.query
+                .filter_by(token=request_token)
+                .one())
+            return render_template(
+                'authorize.html',
+                consumer=request_token.client,
+                permissions=realms)
         elif request.method == 'POST':
-            return request.form['authorized'] == 'Yes'
+            return request.form['authorized'] == 'yes'
