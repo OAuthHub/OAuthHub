@@ -26,8 +26,8 @@ class User:
         """
         if id_ is None:
             id_ = gen_salt(40)
-            while id in users:
-                id = gen_salt(40)
+            while id_ in users:
+                id_ = gen_salt(40)
         self.id = id_
         self.name = name
 

@@ -56,13 +56,13 @@ def _save_access_token(token, req):
     ats = token['oauth_token_secret']
     raw_realms = token['oauth_authorised_realms']
     realms = raw_realms.split(' ')
-    assert all(
+    assert all((
         isinstance(c, Consumer),
         isinstance(u, User),
         isinstance(at, str),
         isinstance(ats, str),
         isinstance(raw_realms, str),
-        isinstance(realms, list)), repr((c, u, at, ats, raw_realms, realms))
+        isinstance(realms, list))), repr((c, u, at, ats, raw_realms, realms))
     t = ConsumerUserAccess(
         client=c,
         user=u,

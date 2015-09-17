@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import gen_salt
 
 db = SQLAlchemy()
+log = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
