@@ -58,11 +58,10 @@ def _add_for_api(app, oauthhub_as_sp):
 
     @app.route('/oauth/authorize', methods=['GET', 'POST'])
     @login_required
-    #oauthhub_as_sp.authorize_handler
+    @oauthhub_as_sp.authorize_handler
     def oauth_authorise():
         if request.method == 'GET':
             return render_template('authorize.html', service_name='XXX', permissions=['a', 'b'])
         elif request.method == 'POST':
-            # Check received form data
-            return "It shall be done." # `True` for authorized.
-
+            if request.form['authorized'] == 'Yes'
+                return True
