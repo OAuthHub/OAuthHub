@@ -1,0 +1,38 @@
+body {
+    font-family: 'Roboto', serif;
+    background-color: lightgrey;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Slab', serif;
+}
+
+#super-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: auto;
+    background-color: white;
+}
+
+.header {
+    padding: 20px;
+    color: white;
+    background-color: green;
+}
+
+.header .page-title{
+    margin: 0;
+}
+
+.flash {
+    width: 70%;
+    margin: auto;
+    border: 1px solid red;
+    border-radius: 3px;
+    background-color: pink;
+    text-align: center;
+}
+
+#content {
+    padding: 20px;
+}
