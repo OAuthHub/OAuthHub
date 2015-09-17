@@ -4,11 +4,34 @@ import os
 import unittest
 from flask_oauthlib.client import OAuth
 
-from models import db, User, UserSPAccess 
-from service_provider import Twitter
+from models import db, User, UserSPAccess, create_app
+from service_provider import ServiceProvider
 import user_functions as uf
 
 info = lambda *a, **k: None
+
+class MockRemoteApplication():
+    def tokengetter(self, f):
+        return f
+
+class MockServiceProvider(ServiceProvider):
+    def _build_client(self, oauth):
+        """ Should return an instance of a an oauth remote app. """
+        return MockRemoteApplication()
+
+    def get_service_name(self):
+        return "MockService"
+
+    def verify(self, token=None):
+        """ Check that this connection is valid. """
+        return True
+
+    def name(self, token=None):
+        """ This is an example of how a resource would be defined for an SP. """
+        return "John Doe"
+
+    def get_id(self, token=None):
+        return "42"
 
 class UserFunctionsTest(unittest.TestCase):
     def setUp(self):
@@ -16,30 +39,45 @@ class UserFunctionsTest(unittest.TestCase):
         db.create_all()
 
     def test_add_user(self):
-        uf.addUser(sp, 'test', 'test')
+        uf.create_user()
         
-        self.assertEqual(1, len(User.query.all()))
-        self.assertEqual(1, len(UserSPAccess.query.all()))
+        self.assertEqual(1, User.query.count())
+        self.assertEqual(0, UserSPAccess.query.count())
 
-    def test_get_user(self):
-        user_created = uf.addUser(sp, 'test', 'test')
+    def test_get_user_when_none_exist(self):
+        try:
+            user = uf.get_user_by_token(sp, 'test', 'test')
+            self.fail()
+        except uf.UserNotFound:
+            pass
 
-        user_retrieved = uf.getUser(sp, 'test', 'test')
-        
+    def test_get_user_by_id_when_none_exist(self):
+        try:
+            user = uf.get_user_by_remote_id(sp, token=('test', 'test'))
+            self.fail()
+        except uf.UserNotFound:
+            pass
+
+    def test_get_user_by_tokens(self):
+        user_created = uf.create_user()
+        uf.add_SP_to_user(user_created, sp, 'test', 'test')
+
+        user_retrieved = uf.get_user_by_token(sp, 'test', 'test')
         self.assertEqual(user_created, user_retrieved)
 
-    def test_get_or_add_user_existing_user(self):
-        user_created = uf.addUser(sp, 'test', 'test')
+    def test_add_sp_to_user(self):
+        user_created = uf.create_user()
+        self.assertEqual(0, UserSPAccess.query.count())
 
-        user_retrieved = uf.getOrCreateUser(sp, 'test', 'test')
-        
-        self.assertEqual(user_created, user_retrieved)
+        uf.add_SP_to_user(user_created, sp, 'test', 'test')
+        self.assertEqual(1, UserSPAccess.query.count())
 
-    def test_get_or_add_user_non_existing_user(self):
-        user_retrieved = uf.getOrCreateUser(sp, 'test', 'test')
-        
-        self.assertEqual(1, len(User.query.all()))
-        self.assertEqual(1, len(UserSPAccess.query.all()))
+    def test_add_sp_to_user_by_id(self):
+        user_created = uf.create_user()
+        uf.add_SP_to_user_by_id(user_created.id, sp, 'test', 'test')
+
+        self.assertEqual(1, UserSPAccess.query.count())
+        self.assertEqual(1, User.query.join(UserSPAccess).count())
 
     def tearDown(self):
         info("Drop tables.")
@@ -61,8 +99,11 @@ if __name__ == '__main__':
         input('Press ^C to cancel, or <Enter> to continue')
     except KeyboardInterrupt:
         os.exit()
-    app = db.get_app()
+
+    app = create_app()
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
-    app = OAuth(app)
-    sp = Twitter(app)
-    unittest.main()
+
+    sp = MockServiceProvider(None)
+
+    with app.app_context():
+        unittest.main()
