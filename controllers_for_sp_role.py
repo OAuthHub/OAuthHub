@@ -1,5 +1,7 @@
 
-from flask import request, redirect, url_for
+from flask import request, redirect, url_for, render_template
+
+from login_status import login_required
 
 def add_sp_role_controllers_to_app(app, oauthhub_as_sp):
     """ Add (OAuth SP) endpoints to your app.
@@ -54,11 +56,11 @@ def _add_for_api(app, oauthhub_as_sp):
     def access_token():
         return {}
 
-    @app.route('/oauth/authorise', method=['GET', 'POST'])
+    @app.route('/oauth/authorize', methods=['GET', 'POST'])
+    @login_required
+    @oauthhub_as_sp.authorize_handler
     def oauth_authorise():
         if request.method == 'GET':
-            return """Would you like some sort of an app to access everything?"""
+            return render_template('authorize.html', service_name='XXX', permissions=['a', 'b'])
         elif request.method == 'POST':
-            # Check received form data
-            return True # `True` for authorized.
-
+            return request.form['authorized'] == 'Yes'
