@@ -6,7 +6,6 @@ import os
 from flask import Flask
 from flask_oauthlib.client import OAuth
 from flask_oauthlib.provider.oauth1 import OAuth1Provider
-from sqlalchemy.orm.exc import NoResultFound
 
 from controllers_for_sp_role import add_sp_role_controllers_to_app
 from controllers_for_rest_api import add_rest_api_controllers_to_app
@@ -32,6 +31,8 @@ providers.add_provider(sp.GitHub(oauth))
 oauthhub_as_sp = OAuth1Provider(app)
 register_all_hooks(oauthhub_as_sp)
 
+add_rest_api_controllers_to_app(app, oauthhub_as_sp)
+add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 add_client_role_controllers_to_app(app, providers)
 add_ui_controllers_to_app(app, providers)
 
