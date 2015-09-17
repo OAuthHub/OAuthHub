@@ -63,5 +63,4 @@ def _add_for_api(app, oauthhub_as_sp):
         if request.method == 'GET':
             return render_template('authorize.html', service_name='XXX', permissions=['a', 'b'])
         elif request.method == 'POST':
-            if request.form['authorized'] == 'Yes'
-                return True
+            return request.form['authorized'] == 'Yes'
