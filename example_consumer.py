@@ -11,6 +11,9 @@ from flask import Flask, request, session, url_for, redirect, render_template
 from werkzeug.security import gen_salt
 from flask_oauthlib.client import OAuth
 
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+
 class User:
 
     def __init__(self, name, id_=None):
@@ -74,12 +77,10 @@ def create_app():
         'SECRET_KEY': 'lol-secret-key',
     })
     oauth = OAuth(app)
-    consumer_key = ''
-    consumer_secret = ''
     oauthhub = oauth.remote_app(
         'oauthhub',
-        consumer_key=consumer_key,
-        consumer_secret=consumer_secret,
+        consumer_key=CONSUMER_KEY,
+        consumer_secret=CONSUMER_SECRET,
         request_token_params={
             'realm': 'read'},
         base_url='http://127.0.0.1:5000/api/v1/',
@@ -127,4 +128,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port='5000')
+    app.run(host='localhost', port=8000)
