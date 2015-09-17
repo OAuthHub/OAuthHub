@@ -7,11 +7,6 @@
         <h1>Hello!</h1>
     {% endif %}
 
-    {% if get_flashed_messages()|length > 0 %}
-        {% for mesg in get_flashed_messages() %}
-            <div class='flash'>{{ mesg }}</div>
-        {% endfor %}
-    {% endif %}
     <div>
         <a href="{{ url_for('login_options') }}">Add another account</a>
     </div>
