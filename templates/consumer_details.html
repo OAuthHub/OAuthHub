@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post">
+    <h1>Consumer #{{ consumer.id }}</h1>
+    <table class="consumer">
+        <tr>
+            <td>Consumer Key</td>
+            <td><code>{{ consumer.client_key }}</code></td>
+        </tr>
+        <tr>
+            <td>Consumer Secret</td>
+            <td><code>{{ consumer.client_secret }}</code></td>
+        </tr>
+        <tr>
+            <td>Default redirect URL</td>
+            <td><code><input
+                type="text"
+                name="redirect-url"
+                size="100"
+                value="{{ consumer.default_redirect_uri }}" />
+            </code></td>
+        </tr>
+        <tr>
+            <td>Realms</td>
+            <td><code><input type="text"
+                name="realms"
+                size="100"
+                value="{{ consumer._realms }}" />
+            </code></td>
+        </tr>
+        <tr>
+            <td>Owner</td>
+            <td><code>{{ consumer.creator }}</code></td>
+        </tr>
+    </table>
+    <input type="submit" value="update" />
+</form>
+{% endblock %}

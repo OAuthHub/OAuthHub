@@ -29,7 +29,8 @@
     <ul id="consumer-list">
         {% for c in consumers %}
         <li>
-            <h5>Consumer #{{ c.id }}</h5>
+            <h5><a href="{{ url_for('developer_app_details', app_id=c.id) }}">
+                Consumer #{{ c.id }}</a></h5>
             <table class="consumer">
                 <tr>
                     <td>Consumer Key</td>

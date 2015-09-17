@@ -75,10 +75,25 @@ def _add_for_admin(app, oauthhub_as_sp):
         else:
             assert False, request.method
 
-    @app.route('/developer/apps/<app_id>')
-    #login_required
+    @app.route('/developer/apps/<app_id>', methods=['GET', 'POST'])
+    @login_required
     def developer_app_details(app_id):
-        return """Some details about app with Consumer Key {!r}.""".format(app_id)
+        if request.method == 'GET':
+            c = Consumer.query.get(app_id)
+            return render_template(
+                'consumer_details.html',
+                consumer=c)
+        elif request.method == 'POST':
+            redirect_url = request.form['redirect-url']
+            realms = request.form['realms']
+            c = Consumer.query.get(app_id)
+            c._redirect_uris = redirect_url
+            c._realms = realms
+            db.session.add(c)
+            db.session.commit()
+            return redirect(request.path)
+        else:
+            assert False, request.method
 
 def _add_for_oauth(app, oauthhub_as_sp):
     """ Define the big-3 OAuth 1.0 endpoints
