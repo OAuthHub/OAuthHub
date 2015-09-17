@@ -10,14 +10,17 @@ from utils import log_io
 
 log = logging.getLogger(__name__)
 
+@log_io(log.debug)
 def _load_client(client_key):
     return Consumer.query.filter(
         Consumer.client_key == client_key).first()
 
+@log_io(log.debug)
 def _load_request_token(token):
     return RequestToken.query.filter(
         RequestToken.token == token).first()
 
+@log_io(log.debug)
 def _save_request_token(token, req):
     rt = token['oauth_token']
     rts = token['oauth_token_secret']
@@ -34,6 +37,7 @@ def _save_request_token(token, req):
     db.session.add(t)
     db.session.commit()
 
+@log_io(log.debug)
 def _load_verifier(verifier, token):
     return RequestToken.query.filter(
         RequestToken.verifier == verifier and
@@ -60,11 +64,13 @@ def _save_verifier(token, verifier, request):     # And args, kwargs
     db.session.add(t)
     db.session.commit()
 
+@log_io(log.debug)
 def _load_access_token(client_key, token):   # And args, kwargs
     return ConsumerUserAccess.query.filter(
         ConsumerUserAccess.client_key == client_key and
         ConsumerUserAccess.token == token).first()
 
+@log_io(log.debug)
 def _save_access_token(token, req):
     c = req.client
     u = req.user
@@ -88,6 +94,7 @@ def _save_access_token(token, req):
     db.session.add(t)
     db.session.commit()
 
+@log_io(log.debug)
 def _load_nonce(client_key, timestamp, nonce, request_token, access_token):
     #http://docs.sqlalchemy.org/en/rel_1_0/orm/query.html#sqlalchemy.orm.query.Query.filter_by
     return (Nonce.query
@@ -99,6 +106,7 @@ def _load_nonce(client_key, timestamp, nonce, request_token, access_token):
                 access_token=access_token)
             .first())
 
+@log_io(log.debug)
 def _save_nonce(client_key, timestamp, nonce, request_token, access_token):
     n = Nonce(
         client_key=client_key,
