@@ -82,7 +82,7 @@ def create_app():
         consumer_secret=consumer_secret,
         request_token_params={
             'realm': 'read'},
-        base_url='http://127.0.0.1:5000/api/v1',
+        base_url='http://127.0.0.1:5000/api/v1/',
         request_token_url='http://127.0.0.1:5000/oauth/request-token',
         access_token_method='GET',
         access_token_url='http://127.0.0.1:5000/oauth/access-token',
@@ -114,7 +114,7 @@ def create_app():
             at = authorized_response['oauth_token']
             ats = authorized_response['oauth_token_secret']
             set_access_token(at, ats)
-            user_resp = oauthhub.get('/user.json')
+            user_resp = oauthhub.get('user.json')
             user = User(user_resp.data['name'])
             save_user(user)
             log_user_in(user)
