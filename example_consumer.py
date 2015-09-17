@@ -65,7 +65,16 @@ def log_user_out():
         del session['user_id']
 
 def get_current_user():
-    return users.get(session.get('user_id'))
+    uid = session.get('user_id')
+    if uid is None:
+        return None
+    else:
+        try:
+            return users[uid]
+        except KeyError as e:
+            log.exception(e)
+            log.debug("Current users: {}".format(users))
+            return None
 
 def login_required(c):
     @wraps(c)
@@ -104,10 +113,10 @@ def create_app():
     @app.route('/')
     def index():
         current_user = get_current_user()
+        log.debug("Index page found session user: {!r}".format(
+            current_user))
         if current_user is None:
-            return render_template(
-                'login.html',
-                user=current_user)
+            return render_template('login.html')
         else:
             return render_template(
                 'user.html',
