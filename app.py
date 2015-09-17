@@ -92,14 +92,13 @@ def login(service_provider):
 
 # TODO: change URL to "/oauth/authorized" --- or better yet, "/oauth/callback"
 @app.route('/oauth-authorized/<service_provider_name>/')
-@login_required
 def oauth_authorized(service_provider_name):
-    current_user = get_current_user()
+    session_user = get_current_user()
     try:
         current_provider = providers.get_by_name(service_provider_name)
         token, secret = current_provider.get_access_tokens()
         fresh_user = get_user_by_token(current_provider, token, secret)
-        if current_user is not None:
+        if session_user is not None:
             if fresh_user.id == current_user.id:
                 flash('This provider was already linked to this account.')
             else:
@@ -111,7 +110,7 @@ def oauth_authorized(service_provider_name):
     except UserDeniedRequest:
         flash('You denied us access.')
     except UserNotFound:
-        if current_user is not None:
+        if session_user is None:
             try:
                 user = get_user_by_remote_id(current_provider, token=(token,secret))
             except UserNotFound:
