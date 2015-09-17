@@ -1,12 +1,9 @@
 
 import logging
 
-from login_status import current_user_id
+from login_status import get_current_user
 from models import (db, Consumer, ConsumerUserAccess, User, UserSPAccess,
         RequestToken, Nonce)
-
-def current_user():
-    return User.get(current_user_id())
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +40,7 @@ def _save_verifier(token, verifier):     # And args, kwargs
     t = RequestToken.query.filter(
         RequestToken.token == token).one()
     t.verifier = verifier
-    t.user = current_user()
+    t.user = get_current_user()
     db.session.add(t)
     db.session.commit()
 
