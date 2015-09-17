@@ -5,6 +5,12 @@
     <link rel='stylesheet' type='text/css' href='/static/providers.css'>
 </head>
 <body>
+    {% if get_flashed_messages()|length > 0 %}
+        {% for mesg in get_flashed_messages() %}
+            <div class='flash'>{{ mesg }}</div>
+        {% endfor %}
+    {% endif %}
+
     <div id='content'>
         {% block content %} {% endblock %}
     </div>
