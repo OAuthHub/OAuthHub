@@ -18,6 +18,11 @@ def add_sp_role_controllers_to_app(app, oauthhub_as_sp):
     """
     _add_for_admin(app, oauthhub_as_sp)
     _add_for_oauth(app, oauthhub_as_sp)
+    app.config.update({
+        'OAUTH1_PROVIDER_ENFORCE_SSL': False,
+        'OAUTH1_PROVIDER_KEY_LENGTH': (10, 100),
+        'OAUTH1_PROVIDER_REALMS': ['read'],
+    })
 
 def _add_for_admin(app, oauthhub_as_sp):
     """ Define pages for manual management

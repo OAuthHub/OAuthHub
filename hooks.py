@@ -73,12 +73,15 @@ def _save_access_token(token, req):
     db.session.commit()
 
 def _load_nonce(client_key, timestamp, nonce, request_token, access_token):
-    return Nonce.query.filter(
-        Nonce.client_key == client_key and
-        Nonce.timestamp == timestamp and
-        Nonce.nonce == nonce,
-        Nonce.request_token == request_token and
-        Nonce.access_token == access_token).first()
+    #http://docs.sqlalchemy.org/en/rel_1_0/orm/query.html#sqlalchemy.orm.query.Query.filter_by
+    return (Nonce.query
+            .filter_by(
+                client_key=client_key,
+                timestamp=timestamp,
+                nonce=nonce,
+                request_token=request_token,
+                access_token=access_token)
+            .first())
 
 def _save_nonce(client_key, timestamp, nonce, request_token, access_token):
     n = Nonce(
