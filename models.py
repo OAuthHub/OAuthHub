@@ -68,7 +68,9 @@ class User(db.Model):
         self.name = name
 
     def __repr__(self):
-        return "<User(name='{}')>".format(self.name)
+        return "<User(id={!r}, name={!r})>".format(
+            self.id,
+            self.name)
 
 class ConsumerUserAccess(db.Model):
     __tablename__ = 'consumer_user_access'

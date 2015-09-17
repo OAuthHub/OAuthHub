@@ -5,14 +5,15 @@ Yeah.
 
 """
 
+import os
 from functools import wraps
 
 from flask import Flask, request, session, url_for, redirect, render_template
 from werkzeug.security import gen_salt
 from flask_oauthlib.client import OAuth
 
-CONSUMER_KEY = ''
-CONSUMER_SECRET = ''
+CONSUMER_KEY = os.environ['OAUTHHUB_CONSUMER_KEY']
+CONSUMER_SECRET = os.environ['OAUTHHUB_CONSUMER_SECRET']
 
 class User:
 
@@ -125,6 +126,8 @@ def create_app():
     def logout():
         log_user_out()
         return redirect(url_for('index'))
+
+    return app
 
 if __name__ == '__main__':
     app = create_app()

@@ -29,12 +29,29 @@
     <ul id="consumer-list">
         {% for c in consumers %}
         <li>
-            <div class="consumer">
-                <h5>{{ c.id }}</h5>
-                <p>Consumer Key: <code>{{ c.client_key }}</code></p>
-                <p>Consumer Secret: <code>{{ c.client_secret }}</code></p>
-                <p>Owner: <code>{{ creator_repr }}</code></p>
-            </div>
+            <h5>Consumer #{{ c.id }}</h5>
+            <table class="consumer">
+                <tr>
+                    <td>Consumer Key</td>
+                    <td><code>{{ c.client_key }}</code></td>
+                </tr>
+                <tr>
+                    <td>Consumer Secret</td>
+                    <td><code>{{ c.client_secret }}</code></td>
+                </tr>
+                <tr>
+                    <td>Default redirect URL</td>
+                    <td><code>{{ c.default_redirect_uri }}</code></td>
+                </tr>
+                <tr>
+                    <td>Realms</td>
+                    <td><code>{{ c._realms }}</code></td>
+                </tr>
+                <tr>
+                    <td>Owner</td>
+                    <td><code>{{ creator_repr }}</code></td>
+                </tr>
+            </table>
         </li>
         {% endfor %}
     </ul>

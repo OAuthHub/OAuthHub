@@ -8,7 +8,7 @@ from flask import (abort, Flask, flash, redirect, render_template, request,
 from flask_oauthlib.client import OAuth
 from flask_oauthlib.provider.oauth1 import OAuth1Provider
 from sqlalchemy.orm.exc import NoResultFound
-from login_status import login_required, get_current_user, log_user_in
+from login_status import login_required, get_current_user, log_user_in, log_user_out
 
 import service_provider as sp
 from controllers_for_sp_role import add_sp_role_controllers_to_app
@@ -35,6 +35,12 @@ providers.add_provider(sp.GitHub(oauth))
 oauthhub_as_sp = OAuth1Provider(app)
 register_all_hooks(oauthhub_as_sp)
 
+@app.route('/')
+def index():
+    # TODO: actually implement?
+    return """This is the index page.<br><a href="{}">Log in now</a>""".format(
+        url_for('login_options'))
+
 @app.route('/user')
 @login_required
 def show_user():
@@ -53,7 +59,11 @@ def show_user():
                     name = service.name()
                 else:
                     name = "(debug mode; saving get-name API call.)"
-                return render_template('user.html', name=name, providers=authorised_services)
+                return render_template(
+                    'user.html',
+                    name=name,
+                    providers=authorised_services,
+                    user_id=user.id)
     return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
 @app.route('/user/providers/remove/<provider_id>')
@@ -126,6 +136,13 @@ def oauth_authorized(service_provider_name):
 def login_options():
     next_url = request.args.get('next') or url_for('show_user')
     return render_template('login.html', next_url=next_url)
+
+@app.route('/logout/')
+def logout():
+    log_user_out()
+    return redirect(
+        request.args.get('next') or
+        url_for('index'))
 
 add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 add_rest_api_controllers_to_app(app, oauthhub_as_sp)
