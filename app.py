@@ -4,6 +4,7 @@ import logging
 import os
 
 from flask import Flask
+from flask import request, redirect, url_for, flash
 from flask_oauthlib.client import OAuth
 from flask_oauthlib.provider.oauth1 import OAuth1Provider
 
@@ -35,6 +36,16 @@ add_rest_api_controllers_to_app(app, oauthhub_as_sp, providers)
 add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 add_client_role_controllers_to_app(app, providers)
 add_ui_controllers_to_app(app, providers)
+
+@app.route('/nuke')
+def nuke():
+    if request.args.get('confirm') == 'yes':
+        db.drop_all()
+        db.create_all()
+        return redirect(url_for('index'))
+    else:
+        flash("Nuking requires confirmation.")
+        return redirect(url_for('index'))
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
