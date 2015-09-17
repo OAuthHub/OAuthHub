@@ -122,8 +122,7 @@ def _add_for_oauth(app, oauthhub_as_sp):
             log.debug("args: {!r}".format(args))
             log.debug("kwargs: {!r}".format(kwargs))
             # Don't know why, but args always passed in as kwargs.
-            raw_realms = kwargs['realms']
-            realms = raw_realms.split(' ')
+            realms = kwargs['realms']
             request_token = kwargs['resource_owner_key']
             # Anyway.
             assert isinstance(realms, list), repr(realms)

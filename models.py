@@ -154,7 +154,7 @@ class RequestToken(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User')          # Does this work?
     redirect_uri = db.Column(db.String(2000))
-    realms = db.Column(db.Text)
+    _realms = db.Column(db.Text)
     token = db.Column(db.String(1000))
     secret = db.Column(db.String(2000))
     verifier = db.Column(db.String(2000))
@@ -182,7 +182,7 @@ class RequestToken(db.Model):
         self.client = client
         self.user = user  # At first RT's have no associated user.
         self.redirect_uri = redirect_uri
-        self.realms = list(realms)
+        self._realms = ' '.join(realms)
         self.token = token
         self.secret = secret
         self.verifier = gen_salt(40)
@@ -197,6 +197,10 @@ class RequestToken(db.Model):
     @property
     def client_key(self):
         return self.client.client_key
+
+    @property
+    def realms(self):
+        return self._realms.split(' ')
 
 class Nonce(db.Model):
     __tablename__ = 'nonce'
