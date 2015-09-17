@@ -9,10 +9,10 @@ def add_sp_role_controllers_to_app(app, oauthhub_as_sp):
     :param app: flask.Flask
     :param oauthhub_as_sp: flask_oauthlib.provider.oauth1.OAuth1Provider
     """
-    _add_for_human(app, oauthhub_as_sp)
-    _add_for_api(app, oauthhub_as_sp)
+    _add_for_admin(app, oauthhub_as_sp)
+    _add_for_oauth(app, oauthhub_as_sp)
 
-def _add_for_human(app, oauthhub_as_sp):
+def _add_for_admin(app, oauthhub_as_sp):
     """ Define pages for manual management
 
     :param app:
@@ -38,7 +38,7 @@ def _add_for_human(app, oauthhub_as_sp):
     def developer_app_details(app_id):
         return """Some details about app with Consumer Key {!r}.""".format(app_id)
 
-def _add_for_api(app, oauthhub_as_sp):
+def _add_for_oauth(app, oauthhub_as_sp):
     """ Define the big-3 OAuth 1.0 endpoints
 
     :param app:

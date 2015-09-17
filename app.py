@@ -12,6 +12,7 @@ from login_status import login_required, get_current_user, log_user_in
 
 import service_provider as sp
 from controllers_for_sp_role import add_sp_role_controllers_to_app
+from controllers_for_rest_api import add_rest_api_controllers_to_app
 from hooks import register_all_hooks
 from models import db, User, UserSPAccess
 from user_functions import (add_SP_to_user_by_id, create_user,
@@ -127,6 +128,7 @@ def login_options():
     return render_template('login.html', next_url=next_url)
 
 add_sp_role_controllers_to_app(app, oauthhub_as_sp)
+add_rest_api_controllers_to_app(app, oauthhub_as_sp)
 
 if __name__ == "__main__":
     with app.app_context():
