@@ -66,7 +66,7 @@ def login_required(c):
         if not user:
             return redirect(url_for(
                 'login',
-                next=request.path))
+            ))
         else:
             return c(*args, **kwargs)
     return first_check
@@ -104,7 +104,7 @@ def create_app():
         return oauthhub.authorize(
             callback=url_for(
                 'callback',
-                next=request.args.get('next') or url_for('index'),
+                #next=request.args.get('next') or url_for('index'),
                 _external=True))
 
     @app.route('/oauth-callback')
