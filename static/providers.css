@@ -1,8 +1,7 @@
 .provider {
-    clear:both;
+    display: flex;
 }
 
 .provider-name, .provider-remove {
-    float: left;
     margin-left: 20px;
 }

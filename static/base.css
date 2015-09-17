@@ -1,19 +1,31 @@
 body {
     font-family: 'Roboto', serif;
+    background-color: lightgrey;
+}
+
+#super-container {
+    max-width: 800px;
+    margin: auto;
+    background-color: white;
 }
 
 .page-title {
-    width: 100%;
     padding: 20px;
+    margin-top: 0;
     font-family: 'Roboto Slab', serif;
-    /* color: white; */
-    /* background-color: #F39639; */
+    color: white;
+    background-color: #F39639;
 }
 
 .flash {
-    width: 800px;
+    width: 70%;
     margin: auto;
     border: 1px solid red;
+    border-radius: 3px;
     background-color: pink;
     text-align: center;
+}
+
+#content {
+    padding: 20px;
 }
