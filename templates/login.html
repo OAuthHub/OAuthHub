@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Log in with:</h1>
+    <ul class='login-list'>
+        <li><a href='/login/twitter?next={{ next_url }}'>Twitter</a></li>
+        <li><a href='/login/github?next={{ next_url }}'>GitHub</a></li>
+    </ul>
+{% endblock %}
