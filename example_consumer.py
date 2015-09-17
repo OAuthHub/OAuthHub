@@ -13,8 +13,8 @@ from flask import Flask, request, session, url_for, redirect, render_template
 from werkzeug.security import gen_salt
 from flask_oauthlib.client import OAuth
 
-CONSUMER_KEY = os.environ['OAUTHHUB_CONSUMER_KEY']
-CONSUMER_SECRET = os.environ['OAUTHHUB_CONSUMER_SECRET']
+CONSUMER_KEY = os.envrion['OAUTHHUB_CONSUMER_KEY']
+CONSUMER_SECRET = os.envrion['OAUTHHUB_CONSUMER_SECRET']
 
 BASE_URL='http://oauthhub.servehttp.com/api/v1/'
 REQUEST_TOKEN_URL='http://oauthhub.servehttp.com/oauth/request-token'
@@ -88,7 +88,7 @@ def login_required(c):
             return c(*args, **kwargs)
     return first_check
 
-def create_app():
+def create_app(consumer_key, consumer_secret):
     app = Flask(
         __name__,
         template_folder='example_consumer_templates')
@@ -99,8 +99,8 @@ def create_app():
     oauth = OAuth(app)
     oauthhub = oauth.remote_app(
         'oauthhub',
-        consumer_key=CONSUMER_KEY,
-        consumer_secret=CONSUMER_SECRET,
+        consumer_key=consumer_key,
+        consumer_secret=consumer_secret,
         request_token_params={
             'realm': 'read'},
         base_url=BASE_URL,
@@ -157,5 +157,5 @@ def create_app():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    app = create_app()
+    app = create_app(CONSUMER_KEY, CONSUMER_SECRET)
     app.run(host='0.0.0.0', port=8000)

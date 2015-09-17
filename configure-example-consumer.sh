@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+export OAUTHHUB_CONSUMER_KEY="$1"
+export OAUTHHUB_CONSUMER_SECRET="$2"
