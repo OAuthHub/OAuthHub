@@ -6,7 +6,7 @@ from flask import request, redirect, url_for, render_template, flash, session
 from werkzeug.security import gen_salt
 
 from login_status import login_required, login_not_really_required
-from models import db, Consumer, ConsumerUserAccess, RequestToken
+from models import db, Consumer, RequestToken
 from login_status import get_current_user
 
 log = logging.getLogger(__name__)

@@ -88,14 +88,15 @@ def _save_access_token(token, req):
         isinstance(ats, str),
         isinstance(raw_realms, str),
         isinstance(realms, list))), repr((c, u, at, ats, raw_realms, realms))
-    t = ConsumerUserAccess(
-        client=c,
-        user=u,
-        realms=realms,
-        token=at,
-        secret=ats)
-    db.session.add(t)
-    db.session.commit()
+    if not ConsumerUserAccess.query.filter_by(token=at).count():
+        t = ConsumerUserAccess(
+            client=c,
+            user=u,
+            realms=realms,
+            token=at,
+            secret=ats)
+        db.session.add(t)
+        db.session.commit()
 
 @log_io(log.debug)
 def _load_nonce(client_key, timestamp, nonce, request_token, access_token):
