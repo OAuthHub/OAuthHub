@@ -7,6 +7,7 @@ Yeah.
 
 import os
 from functools import wraps
+import logging
 
 from flask import Flask, request, session, url_for, redirect, render_template
 from werkzeug.security import gen_salt
@@ -19,6 +20,8 @@ BASE_URL='http://oauthhub.servehttp.com/api/v1/'
 REQUEST_TOKEN_URL='http://oauthhub.servehttp.com/oauth/request-token'
 ACCESS_TOKEN_URL='http://oauthhub.servehttp.com/oauth/access-token'
 AUTHORIZE_URL='http://oauthhub.servehttp.com/oauth/authorize'
+
+log = logging.getLogger(__name__)
 
 class User:
 
@@ -77,7 +80,9 @@ def login_required(c):
     return first_check
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        template_folder='example_consumer_templates')
     app.config.update({
         'DEBUG': True,
         'SECRET_KEY': 'lol-secret-key',
@@ -101,7 +106,7 @@ def create_app():
     def index():
         current_user = get_current_user()
         return render_template(
-            'user.html',
+            'index.html',
             user=current_user)
 
     @app.route('/login/')
@@ -122,7 +127,10 @@ def create_app():
             ats = authorized_response['oauth_token_secret']
             set_access_token(at, ats)
             user_resp = oauthhub.get('user.json')
-            user = User(user_resp.data['name'])
+            log.debug("user_resp: {!r}".format(user_resp))
+            data = user_resp.data
+            log.debug("user_resp.data: {!r}".format(data))
+            user = User(data['name'])
             save_user(user)
             log_user_in(user)
             return redirect(url_for('index'))
@@ -135,5 +143,6 @@ def create_app():
     return app
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     app = create_app()
     app.run(host='localhost', port=8000)
