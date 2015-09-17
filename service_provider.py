@@ -111,7 +111,7 @@ class Twitter(ServiceProvider):
 
     def verify(self, token=None):
         """ Check that this connection is valid. """
-        resp = self.client.get('account/verify_credentials.json')
+        resp = self.client.get('account/verify_credentials.json', token=token)
 
         return resp.status == 200
 
@@ -150,7 +150,7 @@ class GitHub(ServiceProvider):
             base_url=self.client._base_url,
             client_id=self.client._consumer_key,
             access_token=self.client._tokengetter(token=token)[0])
-        response = requests.get(url, auth=HTTPBasicAuth(self.client._consumer_key, self.client._consumer_secret))
+        response = requests.get(url, auth=HTTPBasicAuth(self.client._consumer_key, self.client._consumer_secret), token=token)
 
         return response.status_code == 200
 

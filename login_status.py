@@ -13,7 +13,7 @@ def login_required(controller):
         if not get_current_user():
             return redirect(url_for(
                 'login_options',
-                next=request.path))
+                next=request.full_path))
         else:
             return controller(*args, **kwargs)
     return attempt_log_in

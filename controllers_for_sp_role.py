@@ -1,7 +1,8 @@
 
 import logging
+from functools import wraps
 
-from flask import request, redirect, url_for, render_template, flash
+from flask import request, redirect, url_for, render_template, flash, session
 from werkzeug.security import gen_salt
 
 from login_status import login_required, login_not_really_required
@@ -114,7 +115,7 @@ def _add_for_oauth(app, oauthhub_as_sp):
         return {}
 
     @app.route('/oauth/authorize', methods=['GET', 'POST'])
-    @login_not_really_required
+    @login_required
     @oauthhub_as_sp.authorize_handler
     def oauth_authorise(*args, **kwargs):
         if request.method == 'GET':
