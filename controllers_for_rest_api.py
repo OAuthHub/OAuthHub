@@ -13,7 +13,24 @@ from models import User
 
 _API_BASE_PATH = '/api/v1'
 
-def add_rest_api_controllers_to_app(app, provider):
+
+def get_users_name(user, providers):
+    #TODO return something when the count is zero
+    if user.accesses_to_sps.count():
+        authorised_services = user.accesses_to_sps.all()
+        for service_record in authorised_services:
+            service_name = service_record.sp_class_name
+            token = (service_record.token, service_record.secret)
+
+            if service_name in providers:
+                service = providers[service_name]
+
+                if not service.verify(token=token):
+                    continue
+
+                return service.name(token=token)
+
+def add_rest_api_controllers_to_app(app, provider, service_providers):
     """ Add more endpoints to your app
 
     :param app: flask.Flask
@@ -29,4 +46,4 @@ def add_rest_api_controllers_to_app(app, provider):
             user, type(user))
         return jsonify(
             id=user.id,
-            name=user.name)
+            name=get_users_name(user, service_providers))

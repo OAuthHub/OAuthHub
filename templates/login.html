@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 
+{% block title %}
+    Log in with:
+{% endblock %}
+
 {% block content %}
-    <h1>Log in with:</h1>
     <ul class='login-list'>
-        <li><a href='/login/twitter?next={{ next_url }}'>Twitter</a></li>
-        <li><a href='/login/github?next={{ next_url }}'>GitHub</a></li>
+        {% for prov in providers.values() %}
+            <li><a href='{{ url_for('login', service_provider=prov.get_service_name(), next=next_url) }}'>{{ prov.get_service_name() }}</a></li>
+        {% endfor %}
     </ul>
 {% endblock %}

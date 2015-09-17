@@ -31,7 +31,7 @@ providers.add_provider(sp.GitHub(oauth))
 oauthhub_as_sp = OAuth1Provider(app)
 register_all_hooks(oauthhub_as_sp)
 
-add_rest_api_controllers_to_app(app, oauthhub_as_sp)
+add_rest_api_controllers_to_app(app, oauthhub_as_sp, providers)
 add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 add_client_role_controllers_to_app(app, providers)
 add_ui_controllers_to_app(app, providers)

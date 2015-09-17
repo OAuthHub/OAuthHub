@@ -1,8 +1,12 @@
 .provider {
-    clear:both;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.provider.odd {
+    background-color: lightgrey;
 }
 
 .provider-name, .provider-remove {
-    float: left;
     margin-left: 20px;
 }

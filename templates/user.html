@@ -1,22 +1,28 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block title %}
     {% if name %}
-        <h1>Hello {{ name }}!</h1>
+        Hello {{ name }}!
     {% else %}
-        <h1>Hello!</h1>
+        Hello!
     {% endif %}
-    <!-- User id: {{ user_id }} -->
+{% endblock %}
 
+{% block content %}
+    <!-- User id: {{ user_id }} -->
+    <h3>Providers</h3>
     <div>
         <a href="{{ url_for('login_options') }}">Add another account</a>
     </div>
     <div class='provider-container'>
         {% for sp in providers %}
-            <div class='provider'>
+            <div class='provider {{ loop.cycle('odd', 'even') }}'>
                 <div class='provider-name'>{{ sp.sp_class_name }}</div>
                 <div class='provider-remove'><a href='/user/providers/remove/{{ sp.id }}'>Remove</a></div>
             </div>
         {% endfor %}
     </div>
+
+    <h3>Consumers</h3>
+    <p>Put stuff here</p>
 {% endblock %}

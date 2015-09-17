@@ -69,4 +69,4 @@ def add_ui_controllers_to_app(app, providers):
     @app.route('/login/')
     def login_options():
         next_url = request.args.get('next') or url_for('show_user')
-        return render_template('login.html', next_url=next_url)
+        return render_template('login.html', next_url=next_url, providers=providers)
