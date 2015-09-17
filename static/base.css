@@ -3,8 +3,13 @@ body {
     background-color: lightgrey;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Slab', serif;
+}
+
 #super-container {
-    max-width: 800px;
+    width: 100%;
+    max-width: 1000px;
     margin: auto;
     background-color: white;
 }
@@ -12,7 +17,6 @@ body {
 .page-title {
     padding: 20px;
     margin-top: 0;
-    font-family: 'Roboto Slab', serif;
     color: white;
     background-color: #F39639;
 }

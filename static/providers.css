@@ -1,5 +1,10 @@
 .provider {
     display: flex;
+    flex-wrap: wrap;
+}
+
+.provider.odd {
+    background-color: lightgrey;
 }
 
 .provider-name, .provider-remove {

@@ -10,15 +10,19 @@
 
 {% block content %}
     <!-- User id: {{ user_id }} -->
+    <h2>Providers</h2>
     <div>
         <a href="{{ url_for('login_options') }}">Add another account</a>
     </div>
     <div class='provider-container'>
         {% for sp in providers %}
-            <div class='provider'>
+            <div class='provider {{ loop.cycle('odd', 'even') }}'>
                 <div class='provider-name'>{{ sp.sp_class_name }}</div>
                 <div class='provider-remove'><a href='/user/providers/remove/{{ sp.id }}'>Remove</a></div>
             </div>
         {% endfor %}
     </div>
+
+    <h2>Consumers</h2>
+    <p>Put stuff here</p>
 {% endblock %}
