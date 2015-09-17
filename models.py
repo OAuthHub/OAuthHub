@@ -54,7 +54,7 @@ class Consumer(db.Model):
 
     @property
     def default_realms(self):
-        return self.realms[0]
+        return self.realms
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -161,17 +161,24 @@ class RequestToken(db.Model):
 
     def __init__(self, client, token, secret, redirect_uri, realms, user=None):
         # I'm probably far too defensive here. -- Zong
+        if not isinstance(client, Consumer):
+            raise ValueError("client: {} (type: {})".format(
+                client, type(client)))
+        if not isinstance(token, str):
+            raise ValueError("token: {} (type: {})".format(
+                token, type(token)))
+        if not isinstance(secret, str):
+            raise ValueError("secret: {} (type: {})".format(
+                secret, type(secret)))
+        if not isinstance(redirect_uri, str):
+            raise ValueError("redirect_uri: {} (type: {})".format(
+                redirect_uri, type(redirect_uri)))
         if not all((
-                isinstance(client, Consumer),
-                isinstance(token, str),
-                isinstance(secret, str),
-                isinstance(redirect_uri, str),
                 (isinstance(realms, list) or isinstance(realms, tuple)),
                 realms,
                 isinstance(realms[0], str))):
-            log.debug("RequestToken.__init__ received: {}".format((
-                client, token, secret, redirect_uri, realms, user)))
-            raise ValueError("Check your arguments in the DEBUG log.")
+            raise ValueError("realms: {} (type: {})".format(
+                realms, type(realms)))
         self.client = client
         self.user = user  # At first RT's have no associated user.
         self.redirect_uri = redirect_uri
