@@ -17,16 +17,24 @@ def add_ui_controllers_to_app(app, providers):
         assert user is not None, "login_required didn't work??"
         if user.accesses_to_sps.count():
             authorised_services = user.accesses_to_sps.all()
-            for service_record in authorised_services:
-                service_name = service_record.sp_class_name
-                if service_name in providers:
-                    service = providers[service_name]
-                    # TODO potentially remove the service if it's not valid.
-                    if not app.config.get('DEBUG'):
-                        if not service.verify():
-                            continue
-                    name = service.name()
-                    return render_template('user.html', name=name, providers=authorised_services)
+            if user.name:
+                name = user.name
+            else:
+                for service_record in authorised_services:
+                    service_name = service_record.sp_class_name
+                    if service_name in providers:
+                        service = providers[service_name]
+                        # TODO potentially remove the service if it's not valid.
+                        if not app.config.get('DEBUG'):
+                            if not service.verify():
+                                continue
+                        name = service.name()
+                        user.name = name
+                        db.session.commit()
+                        break
+
+            consumers = user.accesses_from_consumers.all()
+            return render_template('user.html', name=name, providers=authorised_services, consumers=consumers)
         return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
     @app.route('/user/providers/remove/<provider_id>')
