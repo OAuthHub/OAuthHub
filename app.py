@@ -99,7 +99,7 @@ def oauth_authorized(service_provider_name):
         token, secret = current_provider.get_access_tokens()
         fresh_user = get_user_by_token(current_provider, token, secret)
         if session_user is not None:
-            if fresh_user.id == current_user.id:
+            if fresh_user.id == session_user.id:
                 flash('This provider was already linked to this account.')
             else:
                 flash('Merging accounts is not currently supported.')
