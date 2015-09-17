@@ -1,13 +1,15 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block title %}
     {% if name %}
-        <h1>Hello {{ name }}!</h1>
+        Hello {{ name }}!
     {% else %}
-        <h1>Hello!</h1>
+        Hello!
     {% endif %}
-    <!-- User id: {{ user_id }} -->
+{% endblock %}
 
+{% block content %}
+    <!-- User id: {{ user_id }} -->
     <div>
         <a href="{{ url_for('login_options') }}">Add another account</a>
     </div>

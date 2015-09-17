@@ -1,9 +1,19 @@
+body {
+    font-family: 'Roboto', serif;
+}
+
+.page-title {
+    width: 100%;
+    padding: 20px;
+    font-family: 'Roboto Slab', serif;
+    /* color: white; */
+    /* background-color: #F39639; */
+}
+
 .flash {
     width: 800px;
     margin: auto;
-
     border: 1px solid red;
     background-color: pink;
-
     text-align: center;
 }
