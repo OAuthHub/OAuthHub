@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Authorization</h1>
+    <p>Do you wish to give {{ service_name }} permission to access the following:</p>
+    <ul>
+        {% for perm in permissions %}
+            <li>{{ perm }}</li>
+        {% endfor %}
+    </ul>
+    <form method='POST'>
+        <input type='submit' name='authorized' value='Yes' />
+    </form>
+    <a href='/'>Cancel</a>
+{% endblock %}
