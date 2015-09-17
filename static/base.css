@@ -14,11 +14,14 @@ h1, h2, h3, h4, h5, h6 {
     background-color: white;
 }
 
-.page-title {
+.header {
     padding: 20px;
-    margin-top: 0;
     color: white;
     background-color: #F39639;
+}
+
+.header .page-title{
+    margin: 0;
 }
 
 .flash {

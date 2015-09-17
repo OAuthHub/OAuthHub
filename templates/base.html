@@ -9,7 +9,9 @@
 </head>
 <body>
     <div id='super-container'>
-        <h1 class='page-title'>{% block title %} {% endblock %}</h1>
+        <div class='header'>
+            <h1 class='page-title'>OAuthHub</h1>
+        </div>
 
         {% if get_flashed_messages()|length > 0 %}
             {% for mesg in get_flashed_messages() %}
@@ -18,6 +20,7 @@
         {% endif %}
 
         <div id='content'>
+            <h2 class='sub-title'>{% block title %} {% endblock %}</h2>
             {% block content %} {% endblock %}
         </div>
     </div>
