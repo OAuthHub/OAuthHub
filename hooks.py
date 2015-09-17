@@ -70,7 +70,7 @@ def _save_access_token(token, req):
     u = req.user
     at = token['oauth_token']
     ats = token['oauth_token_secret']
-    raw_realms = token['oauth_authorised_realms']
+    raw_realms = token['oauth_authorized_realms']
     realms = raw_realms.split(' ')
     assert all((
         isinstance(c, Consumer),
