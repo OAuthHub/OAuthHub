@@ -25,9 +25,7 @@ def add_ui_controllers_to_app(app, providers):
                     if not app.config.get('DEBUG'):
                         if not service.verify():
                             continue
-                        name = service.name()
-                    else:
-                        name = "(debug mode; saving get-name API call.)"
+                    name = service.name()
                     return render_template('user.html', name=name, providers=authorised_services)
         return show_error_page("Got into show_user with user set to None or no associations with service providers.")
 
