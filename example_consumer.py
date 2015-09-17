@@ -15,6 +15,11 @@ from flask_oauthlib.client import OAuth
 CONSUMER_KEY = os.environ['OAUTHHUB_CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['OAUTHHUB_CONSUMER_SECRET']
 
+BASE_URL='http://oauthhub.servehttp.com/api/v1/'
+REQUEST_TOKEN_URL='http://oauthhub.servehttp.com/oauth/request-token'
+ACCESS_TOKEN_URL='http://oauthhub.servehttp.com/oauth/access-token'
+AUTHORIZE_URL='http://oauthhub.servehttp.com/oauth/authorize'
+
 class User:
 
     def __init__(self, name, id_=None):
@@ -84,11 +89,11 @@ def create_app():
         consumer_secret=CONSUMER_SECRET,
         request_token_params={
             'realm': 'read'},
-        base_url='http://gazza.servehttp.com/api/v1/',
-        request_token_url='http://gazza.servehttp.com/oauth/request-token',
+        base_url=BASE_URL,
+        request_token_url=REQUEST_TOKEN_URL,
         access_token_method='GET',
-        access_token_url='http://gazza.servehttp.com/oauth/access-token',
-        authorize_url='http://gazza.servehttp.com/oauth/authorize')
+        access_token_url=ACCESS_TOKEN_URL,
+        authorize_url=AUTHORIZE_URL)
     oauthhub.tokengetter(get_access_token)
 
     @app.route('/')
