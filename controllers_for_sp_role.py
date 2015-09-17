@@ -50,12 +50,14 @@ def _add_for_admin(app, oauthhub_as_sp):
         elif request.method == 'POST':
             redirect_urls = [request.form['redirect-url']]
             realms = request.form['realms'].split(' ')
+            name = request.form['name']
             fresh_consumer = Consumer(
                 session_user,
                 gen_salt(40),
                 gen_salt(80),
-                redirect_uris=redirect_urls,
-                realms=realms)
+                redirect_urls,
+                realms,
+                name)
             log.debug("Trying to create new Consumer: {!r}".format(
                 fresh_consumer))
             try:

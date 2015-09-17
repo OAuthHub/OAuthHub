@@ -25,8 +25,9 @@ class Consumer(db.Model):
             backref=db.backref('api_apps', lazy='dynamic'))
     _redirect_uris = db.Column(db.Text)
     _realms = db.Column(db.Text)
+    name = db.Column(db.String(2000))
 
-    def __init__(self, creator, client_key, client_secret, redirect_uris, realms):
+    def __init__(self, creator, client_key, client_secret, redirect_uris, realms, name):
         if (any(' ' in uri for uri in redirect_uris) or
                 any(' ' in r for r in realms)):
             raise ValueError("redirect_uris and realms do not allow spaces.")
@@ -35,6 +36,7 @@ class Consumer(db.Model):
         self.client_secret = client_secret
         self._redirect_uris = ' '.join(redirect_uris)
         self._realms = ' '.join(realms)
+        self.name = name
 
     def __repr__(self):
         return "<Consumer(id={!r}, client_key={!r}, client_secret={!r})>".format(
