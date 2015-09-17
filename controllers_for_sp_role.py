@@ -1,7 +1,14 @@
 
-from flask import request, redirect, url_for, render_template
+import logging
+
+from flask import request, redirect, url_for, render_template, flash
+from werkzeug.security import gen_salt
 
 from login_status import login_required
+from models import db, Consumer, ConsumerUserAccess
+from login_status import get_current_user
+
+log = logging.getLogger(__name__)
 
 def add_sp_role_controllers_to_app(app, oauthhub_as_sp):
     """ Add (OAuth SP) endpoints to your app.
@@ -21,14 +28,44 @@ def _add_for_admin(app, oauthhub_as_sp):
     """
 
     @app.route('/developer/apps', methods=['GET', 'POST'])
-    #login_required
+    @login_required
     def developers_apps():
+        session_user = get_current_user()
         if request.method == 'GET':
-            return """(A list of Consumer apps created by you,
-                and a form to create a new one.)"""
+            consumers = (Consumer.query
+                .filter(Consumer.creator == session_user)
+                .all())
+            log.debug("Showing list of Consumers: {}".format(
+                consumers))
+            return render_template(
+                'consumer_list.html',
+                consumers=consumers,
+                creator_repr=repr(session_user))
         elif request.method == 'POST':
-            # Create a new Consumer app
-            # Maybe flash message?
+            redirect_urls = [request.form['redirect-url']]
+            realms = request.form['realms'].split(' ')
+            fresh_consumer = Consumer(
+                session_user,
+                gen_salt(40),
+                gen_salt(80),
+                redirect_uris=redirect_urls,
+                realms=realms)
+            log.debug("Trying to create new Consumer: {!r}".format(
+                fresh_consumer))
+            try:
+                db.session.add(fresh_consumer)
+                db.session.commit()
+                flash(
+                    "You have created a new Consumer app.",
+                    category='success')
+                log.debug("Consumer creation success. "
+                          "Now there are {} Consumers.".format(
+                    Consumer.query.count()))
+            except Exception:      # TODO: What Exception type?
+                db.session.rollback()
+                flash(
+                    "Consumer app creation failed.",
+                    category='fail')
             return redirect(url_for('developers_apps'))
         else:
             assert False, request.method

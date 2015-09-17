@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+
+    <form method="POST">
+        <p>
+            Redirect URL: <input
+                type="text"
+                name="redirect-url"
+                />
+        </p>
+        <p>
+            Realms (space-separated no-space items): <input
+                type="text"
+                name="realms"
+                />
+        </p>
+        <!-- TODO: form validation -->
+        <input
+            type="submit"
+            value="Create a new Consumer app!"
+            class="button"
+                />
+    </form>
+    <hr />
+
+    {% if consumers %}
+    <ul id="consumer-list">
+        {% for c in consumers %}
+        <li>
+            <div class="consumer">
+                <h5>{{ c.id }}</h5>
+                <p>Consumer Key: <code>{{ c.client_key }}</code></p>
+                <p>Consumer Secret: <code>{{ c.client_secret }}</code></p>
+                <p>Owner: <code>{{ creator_repr }}</code></p>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div>You have no Consumer applications yet.</div>
+    {% endif %}
+
+</div>
+{% endblock %}

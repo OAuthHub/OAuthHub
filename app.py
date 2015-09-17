@@ -131,6 +131,7 @@ add_sp_role_controllers_to_app(app, oauthhub_as_sp)
 add_rest_api_controllers_to_app(app, oauthhub_as_sp)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0')
