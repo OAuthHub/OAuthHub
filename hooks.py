@@ -66,9 +66,12 @@ def _save_verifier(token, verifier, request):     # And args, kwargs
 
 @log_io(log.debug)
 def _load_access_token(client_key, token):   # And args, kwargs
-    return ConsumerUserAccess.query.filter(
-        ConsumerUserAccess.client_key == client_key and
-        ConsumerUserAccess.token == token).first()
+    return (ConsumerUserAccess.query
+            .join(Consumer)
+            .filter(
+                Consumer.client_key == client_key,
+                ConsumerUserAccess.token == token)
+            .first())
 
 @log_io(log.debug)
 def _save_access_token(token, req):
