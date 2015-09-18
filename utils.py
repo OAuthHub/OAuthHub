@@ -1,6 +1,8 @@
 
 from functools import wraps
 
+from flask import request, redirect, url_for, flash
+
 def log_io(printer):
     """ Returns a decorator that logs function IO
 
@@ -32,3 +34,22 @@ def log_io(printer):
             return ret
         return decorated
     return decorator
+
+def add_nuke_controllers_to_app(app, db):
+    """ Helps with database resetting
+
+    :param app: flask.Flask
+    :param db: flask_sqlalchemy.SQLAlchemy
+    :return: None
+    """
+    @app.route('/nuke')
+    def nuke():
+        if request.args.get('confirm') == 'yes':
+            db.drop_all()
+            db.create_all()
+            flash("Your database has been reset.")
+            return redirect(url_for('index'))
+        else:
+            flash("Nuking requires confirmation.")
+            return redirect(url_for('index'))
+
