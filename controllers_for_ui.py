@@ -1,7 +1,7 @@
 from flask import (abort, flash, redirect, render_template, request,
         url_for)
 
-from login_status import login_required, get_current_user
+from login_status import login_required, get_current_user, log_user_out
 from models import db, UserSPAccess
 from error_handling import show_error_page
 
@@ -76,3 +76,8 @@ def add_ui_controllers_to_app(app, providers):
     def login_options():
         next_url = request.args.get('next') or url_for('show_user')
         return render_template('login.html', next_url=next_url, providers=providers)
+
+    @app.route('/logout/')
+    def logout():
+        log_user_out()
+        return redirect(url_for('index'))
