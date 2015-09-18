@@ -10,6 +10,8 @@
 
 {% block content %}
     <!-- User id: {{ user_id }} -->
+    <p><a href="{{ url_for('logout') }}">logout</a></p>
+    <p><a href="{{ url_for('developers_apps') }}">Manage your Consumer applications</a></p>
     <h3>Providers</h3>
     <div>
         <a href="{{ url_for('login_options') }}">Add another account</a>
@@ -32,5 +34,4 @@
             </div>
         {% endfor %}
     </div>
-    <p><a href="{{ url_for('developers_apps') }}">Developers</a></p>
 {% endblock %}

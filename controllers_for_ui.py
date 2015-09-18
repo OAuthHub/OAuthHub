@@ -10,7 +10,7 @@ def add_ui_controllers_to_app(app, providers):
     def index():
         return redirect(url_for('show_user'))
 
-    @app.route('/user')
+    @app.route('/user/')
     @login_required
     def show_user():
         user = get_current_user()
