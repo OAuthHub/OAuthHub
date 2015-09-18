@@ -13,8 +13,8 @@ from flask import Flask, request, session, url_for, redirect, render_template
 from werkzeug.security import gen_salt
 from flask_oauthlib.client import OAuth
 
-CONSUMER_KEY = os.envrion['OAUTHHUB_CONSUMER_KEY']
-CONSUMER_SECRET = os.envrion['OAUTHHUB_CONSUMER_SECRET']
+CONSUMER_KEY = os.environ['OAUTHHUB_CONSUMER_KEY']
+CONSUMER_SECRET = os.environ['OAUTHHUB_CONSUMER_SECRET']
 
 BASE_URL='http://oauthhub.servehttp.com/api/v1/'
 REQUEST_TOKEN_URL='http://oauthhub.servehttp.com/oauth/request-token'
