@@ -58,3 +58,9 @@ The environment variables you will need to run this are:
 + TWITTER_CONSUMER_SECRET
 + GITHUB_CONSUMER_KEY
 + GITHUB_CONSUMER_SECRET
+
+# Example Servers
+
+You can visit examples of [`OAuthHub`](http://oauthhub.servehttp.com/) and an
+[`example consumer`](http://consumer.service.com/) that have already been set
+up.
