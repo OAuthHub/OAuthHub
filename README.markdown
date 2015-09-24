@@ -61,6 +61,6 @@ The environment variables you will need to run this are:
 
 # Example Servers
 
-You can visit examples of [`OAuthHub`](http://oauthhub.servehttp.com/) and an
-[`example consumer`](http://consumer.service.com/) that have already been set
+You can visit examples of [OAuthHub](http://oauthhub.servehttp.com/) and an
+[example consumer](http://consumer.servehttp.com/) that have already been set
 up.
