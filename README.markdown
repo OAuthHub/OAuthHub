@@ -4,7 +4,7 @@ OAuthHub
 
 An OAuth Server that consolidates identities from multiple OAuth Servers.
 
-# Database configuration
+## Database configuration
 
 Set up an `SQLALCHEMY_DATABASE_URI` environment variable as per
 <http://flask-sqlalchemy.pocoo.org/2.0/config/>.
@@ -20,7 +20,7 @@ variable. An example of the authorisation could be like this:
     mysql> GRANT ALL PRIVILEGES ON lol_db.* TO 'lol_user'@'localhost'
         -> IDENTIFIED BY 'clear-text-password';
 
-# Python 3
+## Python 3
 
 If you're using MySQL, notice that the module `MySQLdb` (from the pip package
 [`MySQL-python`](https://pypi.python.org/pypi/MySQL-python/1.2.5)) doesn't
@@ -33,7 +33,7 @@ to Flask-SQLAlchemy as `pymysql` in the "driver" field of the URI string. More
 details on `PyMySQL`:
 <http://stackoverflow.com/questions/22252397/importerror-no-module-named-mysqldb>.
 
-# Unit testing
+## Unit testing
 
 For unit testing, create a separate database in the same DBMS (e.g. MySQL) using 
 the same approach, and set up an environment variable 
@@ -46,7 +46,7 @@ something equivalent to these commands:
     $ source .venv/bin/activate
     (.venv)$ PYTHONPATH=. python tests/whichever_you_want.py
 
-# Running OAuthHub
+## Running OAuthHub
 
 Run app.py and visit the relevant URL. You will have to make sure that this URL
 is inline with what you entered on the service providers website when you
@@ -59,7 +59,7 @@ The environment variables you will need to run this are:
 + GITHUB_CONSUMER_KEY
 + GITHUB_CONSUMER_SECRET
 
-# Example Servers
+## Example Servers
 
 You can visit examples of [OAuthHub](http://oauthhub.servehttp.com/) and an
 [example consumer](http://consumer.servehttp.com/) that have already been set
