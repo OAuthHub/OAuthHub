@@ -54,10 +54,10 @@ registered your application.
 
 The environment variables you will need to run this are:
 
-+ TWITTER_CONSUMER_KEY
-+ TWITTER_CONSUMER_SECRET
-+ GITHUB_CONSUMER_KEY
-+ GITHUB_CONSUMER_SECRET
++ `TWITTER_CONSUMER_KEY`
++ `TWITTER_CONSUMER_SECRET`
++ `GITHUB_CONSUMER_KEY`
++ `GITHUB_CONSUMER_SECRET`
 
 ## Example Servers
 
