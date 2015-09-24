@@ -46,6 +46,15 @@ something equivalent to these commands:
     $ source .venv/bin/activate
     (.venv)$ PYTHONPATH=. python tests/whichever_you_want.py
 
-# Running the OAuthHub Consumer
+# Running OAuthHub
 
-Run OAuthHub and visit http://foo.bar/make-server.
+Run app.py and visit the relevant URL. You will have to make sure that this URL
+is inline with what you entered on the service providers website when you
+registered your application.
+
+The environment variables you will need to run this are:
+
++ TWITTER_CONSUMER_KEY
++ TWITTER_CONSUMER_SECRET
++ GITHUB_CONSUMER_KEY
++ GITHUB_CONSUMER_SECRET
