@@ -124,8 +124,8 @@ class Twitter(ServiceProvider):
 class GitHub(ServiceProvider):
     def _build_client(self, oauth):
         return oauth.remote_app('github',
-            consumer_key='6bcf6d2df5ff0f003735',
-            consumer_secret='ebb3d95e13d0a87cdd9614ede2f9b87a16e87fd9',
+            consumer_key=environ['GITHUB_CONSUMER_KEY'],
+            consumer_secret=environ['GITHUB_CONSUMER_SECRET'],
             request_token_params={'scope': 'user'},
             base_url='https://api.github.com/',
             request_token_url=None,
