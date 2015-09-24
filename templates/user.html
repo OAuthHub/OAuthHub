@@ -30,7 +30,7 @@
         {% for c in consumers %}
             <div class='provider {{ loop.cycle('odd', 'even') }}'>
                 <div class='provider-name'>Consumer #{{ c.client_id }}, by {{ c.client.creator.name }}</div>
-                <div class='provider-remove'><a href='/user/consumers/remove/{{ c.client_id }}'>Remove</a></div>
+                <div class='provider-remove'><a href='/user/consumers/remove/{{ c.id }}'>Remove</a></div>
             </div>
         {% endfor %}
     </div>

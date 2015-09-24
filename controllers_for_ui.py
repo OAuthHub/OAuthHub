@@ -1,8 +1,9 @@
 from flask import (abort, flash, redirect, render_template, request,
         url_for)
+from sqlalchemy.orm.exc import NoResultFound
 
 from login_status import login_required, get_current_user, log_user_out
-from models import db, UserSPAccess
+from models import db, UserSPAccess, ConsumerUserAccess
 from error_handling import show_error_page
 
 def add_ui_controllers_to_app(app, providers):
@@ -58,6 +59,23 @@ def add_ui_controllers_to_app(app, providers):
             db.session.delete(provider)
             db.session.commit()
             return redirect(url_for('show_user'))
+
+    @app.route('/user/consumers/remove/<consumer_id>')
+    @login_required
+    def user_consumers_remove(consumer_id=None):
+        if consumer_id is None:
+            return redirect(url_for('show_user'))
+        user = get_current_user()
+        assert user is not None, "login_required didn't work??"
+        try:
+            consumer = (user.accesses_from_consumers
+                .filter(ConsumerUserAccess.id == consumer_id)
+                .one())
+            db.session.delete(consumer)
+            db.session.commit()
+        except NoResultFound:
+            flash("No consumer matching that ID.")
+        return redirect(url_for('show_user'))
 
     @app.route('/login/<service_provider>/')
     def login(service_provider):
